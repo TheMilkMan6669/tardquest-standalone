@@ -11,7 +11,9 @@ A standalone desktop application build for the hit dungeon crawler, [TardQuest](
 # Build instructions
 - Clone repo or download source code
 - Drop files in a folder
-- Open a terminal in said folder
+- Download the latest [TardQuest](https://github.com/packardbell95/tardquest) source code
+- Place the files from the /src/ folder into /GameData? (in the standalone build's root folder)
+- Open a terminal in the main standalone folder
 - Run the following commands:
 ```
 npm install
@@ -31,3 +33,4 @@ Linux:
 ```
 electron-packager . TardQuest --platform linux --arch x64 -asar --icon=icon.ico --overwrite
 ```
+
