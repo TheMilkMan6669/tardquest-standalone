@@ -33,4 +33,5 @@ Linux:
 ```
 electron-packager . TardQuest --platform linux --arch x64 -asar --icon=icon.ico --overwrite
 ```
-
+## And that's it...
+You should see a folder inside your standalone build's project folder titled "TardQuest-win32-x64", or something similar, depending on what platform you built for. Simply run TardQuest.exe
