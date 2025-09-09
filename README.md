@@ -35,3 +35,5 @@ electron-packager . TardQuest --platform linux --arch x64 -asar --icon=icon.ico 
 ```
 ## And that's it...
 You should see a folder inside your standalone build's project folder titled "TardQuest-win32-x64", or something similar, depending on what platform you built for. Simply run TardQuest.exe
+
+<img width="auto" height="400" alt="Screenshot 2025-09-08 221337" src="https://github.com/user-attachments/assets/32533751-988b-4d9d-ac01-f3659d3af715" />
