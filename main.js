@@ -2,51 +2,32 @@ import 'update-electron-app';
 import { BrowserWindow, app, ipcMain } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import http from 'http';
-import fs from 'fs';
+import express from 'express';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// --- Start built-in HTTP server ---
+// --- Start Express HTTP server ---
 const serverPort = 9599;
-const publicDir = path.join(__dirname, 'GameData');
+const publicDir = path.join(__dirname, 'HttpData');
 
-const mimeTypes = {
-    '.html': 'text/html',
-    '.js':   'application/javascript',
-    '.css':  'text/css',
-    '.png':  'image/png',
-    '.jpg':  'image/jpeg',
-    '.ico':  'image/x-icon',
-    '.json': 'application/json',
-    '.svg':  'image/svg+xml',
-    '.woff': 'font/woff',
-    '.woff2': 'font/woff2',
-    '.ttf':  'font/ttf',
-    '.map':  'application/json'
-};
+const webApp = express();
 
-const server = http.createServer((req, res) => {
-    let reqPath = req.url.split('?')[0];
-    if (reqPath === '/') reqPath = '/index.html';
-    const filePath = path.join(publicDir, reqPath);
+// Serve static assets from GameData (serves index.html for / by default)
+webApp.use(express.static(publicDir));
 
-    fs.readFile(filePath, (err, data) => {
-        if (err) {
-            res.writeHead(404);
-            res.end('Not found');
-            return;
-        }
-        const ext = path.extname(filePath);
-        res.writeHead(200, { 'Content-Type': mimeTypes[ext] || 'application/octet-stream' });
-        res.end(data);
-    });
+// 404 handler to mirror previous behavior
+webApp.use((req, res) => {
+    res.status(404).send('Not found');
 });
 
-server.listen(serverPort, () => {
+const server = webApp.listen(serverPort, () => {
     console.log(`Local server running at http://localhost:${serverPort}`);
 });
-// --- End HTTP server ---
+
+server.on('error', (err) => {
+    console.error('Local server error:', err);
+});
+// --- End Express HTTP server ---
 
 app.commandLine.appendSwitch('no-sandbox');
 
@@ -95,7 +76,7 @@ const createWindow = () => {
         win.webContents.send('fullscreen-changed', false);
     });
 
-    win.loadFile("AppData/index.html");
+    win.loadURL(`http://localhost:${serverPort}/AppData/index.html`);
 };
 
 app.whenReady().then(() => {
@@ -104,4 +85,13 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit();
+});
+
+// Ensure the local server is closed on app quit
+app.on('before-quit', () => {
+    try {
+        server.close();
+    } catch (e) {
+        // ignore
+    }
 });
