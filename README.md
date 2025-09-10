@@ -12,7 +12,7 @@ A standalone desktop application build for the hit dungeon crawler, [TardQuest](
 - Clone repo or download source code
 - Drop files in a folder
 - Download the latest [TardQuest](https://github.com/packardbell95/tardquest) source code
-- Place the files from the /src/ folder into /GameData? (in the standalone build's root folder)
+- Place the TardQuest game files from the /src/ folder into /HttpData/GameData/ (in the standalone build's root folder)
 - Open a terminal in the main standalone folder
 - Run the following commands:
 ```
