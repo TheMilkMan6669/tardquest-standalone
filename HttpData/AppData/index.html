@@ -31,7 +31,8 @@
             <select class="filter-dropdown" id="filterSelect" onchange="toggleRetroFilter()">
                 <option value="" disabled selected>Retro Filter</option>
                 <option value="off">Off</option>
-                <option value="on">On</option>
+                <option value="on">Scanlines Only</option>
+                <option value="both">Scanlines + Dithering</option>
             </select>
         </div>
         <div class="online-selector">
@@ -44,7 +45,9 @@
     <div class="main-content">
         <iframe src="../GameData/game.html" frameborder="0" id="gameFrame"></iframe>
     </div>
-    <div class="crt-filter" id="crtFilter"></div>
+    <div class="crt-filter" id="crtFilter">
+        <div class="dither-overlay" id="ditherOverlay"></div>
+    </div>
     <div id="leaderboardWindow" class="draggable-window" style="display:none;">
         <div class="draggable-titlebar" id="leaderboardTitlebar">
             <span class="draggable-title">TardBoard</span>

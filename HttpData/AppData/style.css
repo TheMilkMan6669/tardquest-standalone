@@ -48,6 +48,8 @@ iframe#gameFrame {
     overflow: hidden;
 }
 
+/* ============================== Titlebar =============================== */
+
 .toolbar-strip {
     position: fixed;
     top: 20px;
@@ -104,6 +106,8 @@ iframe#gameFrame {
     flex-shrink: 1;
     min-width: 0;
 }
+
+/* ==============================Window Control Buttons=============================== */
 
 .window-controls {
     margin-left: auto;
@@ -177,6 +181,8 @@ iframe#gameFrame {
     background-image: url("../AppData/titlebar/close.png");
 }
 
+/* =============================Dropdown Menus ===============================*/
+
 .border-dropdown,
 .filter-dropdown {
     height: 20px;
@@ -206,8 +212,8 @@ iframe#gameFrame {
     padding-left: 0;
 }
 
+/* ============================Retro Filter================================= */
 
-/* CRT filter */
 .crt-filter {
     position: fixed;
     top: 0;
@@ -294,7 +300,19 @@ iframe#gameFrame {
     }
 }
 
-/* Draggable TardBoard window */
+.dither-overlay {
+    pointer-events: none;
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: url("../AppData/assets/dither.png") repeat;
+    background-size: 8px 8px;
+    background-attachment: fixed;
+    opacity: 0.69;
+    z-index: 2;
+    display: none;
+}
+
+/* =========================== Tardboard Window ============================= */
 .online-dropdown {
     height: 20px;
     font-size: 13px;
