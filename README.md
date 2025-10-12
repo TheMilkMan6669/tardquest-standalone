@@ -25,7 +25,7 @@ npm run build:win
 ```
 Linux:
 ```
-electron-packager . TardQuest --platform linux --arch x64 -asar --icon=icon.ico --overwrite
+npn run build:linux
 ```
 ## And that's it...
 You should see the /dist/ folder pop up with the desired builds inside. If the Windows build command was run, you will see that both x32 and x64 versions were built automatically. Portable .exe builds can be found in here, or alternatively you will see unpacked loose file versions in the "win-unpacked" (x64) and "win-ia32-unpacked" (x32) folders.
