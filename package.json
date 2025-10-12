@@ -1,13 +1,14 @@
 {
-  "name": "1.0.0",
-  "version": "1.0.0",
-  "description": "Electron port of Tardquest",
+  "name": "tardquest",
+  "version": "1.18.4",
+  "description": "Electron port of TardQuest",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
     "build": "electron-builder",
-    "build:linux": "electron-builder --linux"
+    "build:linux": "electron-builder --linux",
+    "build:win": "electron-builder --win"
   },
   "author": "TheMilkMan",
   "license": "ISC",
@@ -17,6 +18,27 @@
     "electron-packager": "^17.1.2"
   },
   "build": {
+    "productName": "TardQuest",
+    "appId": "com.themilkman.tardquest",
+    "asar": true,
+    "files": [
+      "**/*"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ]
+    },
     "linux": {
       "target": [
         {
