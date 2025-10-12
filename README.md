@@ -19,21 +19,15 @@ A standalone desktop application build for the hit dungeon crawler, [TardQuest](
 npm install
 ```
 ## Depending on the platform...
-Windows (x64):
+Windows (x32 + x64):
 ```
-electron-packager . TardQuest --platform win32 --arch x64 --asar --icon=icon.ico --overwrite
+npm run build:win
 ```
-
-Windows (x32):
-```
-electron-packager . TardQuest --platform win32 --arch ia32 -asar --icon=icon.ico --overwrite
-```
-
 Linux:
 ```
 electron-packager . TardQuest --platform linux --arch x64 -asar --icon=icon.ico --overwrite
 ```
 ## And that's it...
-You should see a folder inside your standalone build's project folder titled "TardQuest-win32-x64", or something similar, depending on what platform you built for. Simply run TardQuest.exe
+You should see the /dist/ folder pop up with the desired builds inside. If the Windows build command was run, you will see that both x32 and x64 versions were built automatically. Portable .exe builds can be found in here, or alternatively you will see unpacked loose file versions in the "win-unpacked" (x64) and "win-ia32-unpacked" (x32) folders.
 
 <img width="auto" height="400" alt="Screenshot 2025-09-08 221337" src="https://github.com/user-attachments/assets/32533751-988b-4d9d-ac01-f3659d3af715" />
