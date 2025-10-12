@@ -1,13 +1,14 @@
 {
-  "name": "1.0.0",
-  "version": "1.0.0",
-  "description": "Electron port of Tardquest",
+  "name": "turdquest",
+  "version": "1.18.4",
+  "description": "Electron port of Turdquest",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
     "build": "electron-builder",
-    "build:linux": "electron-builder --linux"
+    "build:linux": "electron-builder --linux",
+    "build:win": "electron-builder --win"
   },
   "author": "TheMilkMan",
   "license": "ISC",
@@ -17,6 +18,36 @@
     "electron-packager": "^17.1.2"
   },
   "build": {
+    "productName": "TurdQuest",
+    "appId": "com.themilkman.turdquest",
+    "asar": true,
+    "files": [
+      "**/*"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    },
     "linux": {
       "target": [
         {
