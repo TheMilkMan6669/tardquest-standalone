@@ -44,6 +44,10 @@ let isDragging = false, dragOffsetX = 0, dragOffsetY = 0;
 
 leaderboardTitlebar.addEventListener('pointerdown', (e) => {
     if (e.target === closeLeaderboardBtn) return;
+    
+    // Bring window to front
+    bringWindowToFront(leaderboardWindow);
+    
     isDragging = true;
     const rect = leaderboardWindow.getBoundingClientRect();
     dragOffsetX = e.clientX - rect.left;

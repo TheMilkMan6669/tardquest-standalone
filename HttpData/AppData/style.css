@@ -184,7 +184,8 @@ iframe#gameFrame {
 /* =============================Dropdown Menus ===============================*/
 
 .border-dropdown,
-.filter-dropdown {
+.filter-dropdown,
+.dev-dropdown {
     height: 20px;
     font-size: 13px;
     text-shadow: #000000 1px 0px 0px;
@@ -200,13 +201,15 @@ iframe#gameFrame {
 }
 .border-dropdown option,
 .filter-dropdown option,
-.online-dropdown option {
+.online-dropdown option,
+.dev-dropdown option {
     border-radius: 0px;
 }
 
 .border-selector,
 .filter-selector,
-.online-selector {
+.online-selector,
+.dev-selector {
     -webkit-app-region: no-drag;
     margin-left: 0;
     padding-left: 0;
@@ -313,7 +316,8 @@ iframe#gameFrame {
 }
 
 /* =========================== Tardboard Window ============================= */
-.online-dropdown {
+.online-dropdown,
+.dev-dropdown {
     height: 20px;
     font-size: 13px;
     text-shadow: #000000 1px 0px 0px;
@@ -341,6 +345,15 @@ iframe#gameFrame {
     flex-direction: column;
     user-select: none;
     overflow: hidden;
+}
+#tardtestWindow {
+    width: 580px;
+    height: 550px;
+}
+
+#apitestWindow {
+    width: 580px;
+    height: 550px;
 }
 
 .draggable-titlebar {
@@ -379,6 +392,75 @@ iframe#gameFrame {
     border: white 4px solid;
     border-top: none;
     margin-top: -4px;
+}
+
+/* ============================= Password Modal ===============================*/
+.password-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 69420;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.password-modal-content {
+    background-color: #000000;
+    border: 2px solid white;
+    padding: 20px;
+    min-width: 300px;
+    text-align: center;
+    color: white;
+    font-family: sans-serif;
+}
+
+.password-modal-content h3 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.password-modal-content input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    background-color: #000000;
+    border: 1px solid white;
+    color: rgb(0, 255, 21);
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.password-modal-content input:focus {
+    outline: none;
+    background-color: #000000;
+}
+
+.password-modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.password-modal-buttons button {
+    padding: 8px 20px;
+    background-color: #000000;
+    border: 1px solid white;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.password-modal-buttons button:hover {
+    background-color: #00751d;
+}
+
+.password-modal-buttons button:active {
+    background-color: #025e11;
 }
 
 
