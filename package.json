@@ -15,8 +15,7 @@
   "devDependencies": {
     "electron": "^36.8.1",
     "electron-builder": "^24.13.3",
-    "electron-packager": "^17.1.2",
-    "sharp": "^0.32.6"
+    "electron-packager": "^17.1.2"
   },
   "build": {
     "icon": "icon-256.png",
