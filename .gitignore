@@ -3,6 +3,8 @@ node_modules/
 
 # Electron build output
 TardQuest-win32-x64/
+dist/
+HttpData/GameData/
 
 # OS-specific files
 .DS_Store
@@ -17,5 +19,3 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
-
-# VSCode settings

@@ -18,6 +18,7 @@
     "electron-packager": "^17.1.2"
   },
   "build": {
+    "icon": "icon-256.png",
     "productName": "TardQuest",
     "appId": "com.themilkman.tardquest",
     "asar": true,
@@ -40,6 +41,7 @@
       ]
     },
     "linux": {
+      "category": "Game",
       "target": [
         {
           "target": "AppImage",
