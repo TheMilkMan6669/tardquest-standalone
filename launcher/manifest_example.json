@@ -1,0 +1,8 @@
+{
+  "version": "1.20.0",
+  "file_name": "TurdQuest-1.20.0-x64.exe",
+  "download_url": "https://github.com/VocaPepper/turdquest-ge/releases/download/1.20.0/TurdQuest-1.20.0-x64.exe",
+  "sha256": "7487abc73d2152ed2c70ff564d1df48113aef94090033b070075df0ac9b5ab97",
+  "size": 94038371,
+  "release_notes": "(ONLINE FEATURE) Scattered throughout the TardSpire, you will now see gravestones pop up displaying the names of those who have been met with a terrible fate. These names are pulled from the submitted TardBoard scores. (VocaPepper)\n\nParty members can now gain EXP and level up. (Xx_TheMilkMan69_xX)\n\nParty members have been given more detailed character sheets displaying various stats, as well as what line of dialogue you used to persuade them into your party. You can bring this window up simply by clicking on a member's name via the party list. (Xx_TheMilkMan69_xX)\n\nParty members can now be renamed via their respective character sheets. (Xx_TheMilkMan69_xX)\n\nParty members can now be healed by consuming a PHIAL OF SEED via their respective character sheets. These can be purchased from a Merchant or found in chests, but cannot be consumed by the player themself. (Xx_TheMilkMan69_xX)\n\nNew dev API test suite UI overhaul. This is normally only accessible by us, the developers. (VocaPepper)"
+}
