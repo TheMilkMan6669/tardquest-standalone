@@ -1,7 +1,7 @@
 {
-  "name": "turdquest",
-  "version": "1.18.4",
-  "description": "Electron port of Turdquest",
+  "name": "tardquest",
+  "version": "1.20.0",
+  "description": "Electron port of TardQuest",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -18,8 +18,9 @@
     "electron-packager": "^17.1.2"
   },
   "build": {
-    "productName": "TurdQuest",
-    "appId": "com.themilkman.turdquest",
+    "icon": "icon-256.png",
+    "productName": "TardQuest",
+    "appId": "com.themilkman.tardquest",
     "asar": true,
     "files": [
       "**/*"
@@ -28,27 +29,19 @@
       "output": "dist"
     },
     "win": {
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
       "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        },
         {
           "target": "portable",
           "arch": [
-            "x64"
+            "x64",
+            "ia32"
           ]
         }
       ]
     },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true
-    },
     "linux": {
+      "category": "Game",
       "target": [
         {
           "target": "AppImage",

@@ -2,11 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+<<<<<<< HEAD
     <title>TURDQUEST</title>
+=======
+    <title>TARDQUEST - Extra 'Tarded Edition</title>
+>>>>>>> 095872aaa0c679268e12578dd909f2ee70162d94
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+<!----------------------------------------- Titlebar ------------------------------------->
+
     <div class="custom-titlebar">
         <img class="custom-titlebar-logo" src="../AppData/titlebar/logo.png">
         <div class="custom-titlebar-name"><i>TURDQUEST - Ganked Edition</i></div>
@@ -17,6 +24,9 @@
             <button class="window-control close" onclick="window.electronAPI.closeWindow()"></button>
         </div>
     </div>
+
+<!----------------------------------------- Toolbar -------------------------------------->
+
     <div class="toolbar-strip">
         <div class="border-selector">
             <select class="border-dropdown" id="borderSelect" onchange="changeBorder()">
@@ -41,13 +51,26 @@
                 <option value="tardboard">TurdBoard</option>
             </select>
         </div>
+        <div class="dev-selector">
+            <select class="dev-dropdown" id="devSelect">
+                <option value="" disabled selected>Dev</option>
+                <option value="tardtest">TardTest</option>
+                <option value="apitest">APITest</option>
+            </select>
+        </div>
     </div>
+
+<!----------------------------------------- Body --------------------------------------->
+
     <div class="main-content">
         <iframe src="../GameData/game.html" frameborder="0" id="gameFrame"></iframe>
     </div>
     <div class="crt-filter" id="crtFilter">
         <div class="dither-overlay" id="ditherOverlay"></div>
     </div>
+
+<!----------------------------------- Draggable Windows --------------------------------->
+
     <div id="leaderboardWindow" class="draggable-window" style="display:none;">
         <div class="draggable-titlebar" id="leaderboardTitlebar">
             <span class="draggable-title">TurdBoard</span>
@@ -55,8 +78,42 @@
         </div>
         <div class="draggable-content" id="leaderboardContent"></div>
     </div>
+    <div id="tardtestWindow" class="draggable-window" style="display:none;">
+        <div class="draggable-titlebar" id="tardtestTitlebar">
+            <span class="draggable-title">TardTest</span>
+            <button class="window-control close" id="closeTardtestBtn" title="Close"></button>
+        </div>
+        <div class="draggable-content" id="tardtestContent"></div>
+    </div>
+    <div id="apitestWindow" class="draggable-window" style="display:none;">
+        <div class="draggable-titlebar" id="apitestTitlebar">
+            <span class="draggable-title">APITest</span>
+            <button class="window-control close" id="closeApitestBtn" title="Close"></button>
+        </div>
+        <div class="draggable-content" id="apitestContent"></div>
+    </div>
+    
+<!----------------------------------- Password Modal --------------------------------->
+
+    <div id="passwordModal" class="password-modal" style="display:none;">
+        <div class="password-modal-content">
+            <h2>You must be a developer to access these tools.</h2>
+            <input type="password" id="passwordInput" placeholder="Enter Developer Password">
+            <div class="password-modal-buttons">
+                <button id="passwordSubmit">OK</button>
+                <button id="passwordCancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+<!------------------------------------- Scripts --------------------------------------->
+
     <script src="../AppData/scripts/titlebar.js"></script>
     <script src="../AppData/scripts/retrofilter.js"></script>
     <script src="../AppData/scripts/tardboard.js"></script>
+    <script src="../AppData/scripts/tardtest.js"></script>
+    <script src="../AppData/scripts/apitest.js"></script>
+    <script src="https://milklounge.wang/tardquest/devtools.js"></script>
+    <script src="../AppData/scripts/windowfocus.js"></script>
 </body>
 </html>
