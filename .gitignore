@@ -5,6 +5,7 @@ node_modules/
 TardQuest-win32-x64/
 dist/
 HttpData/GameData/
+package-lock.json
 
 # OS-specific files
 .DS_Store
