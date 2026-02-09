@@ -1,7 +1,7 @@
 {
-  "name": "tardquest",
+  "name": "turdquest",
   "version": "1.20.0",
-  "description": "Electron port of TardQuest",
+  "description": "Electron port of TurdQuest",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -19,8 +19,8 @@
   },
   "build": {
     "icon": "icon-256.png",
-    "productName": "TardQuest",
-    "appId": "com.themilkman.tardquest",
+    "productName": "TurdQuest",
+    "appId": "com.themilkman.turdquest",
     "asar": true,
     "files": [
       "**/*"
