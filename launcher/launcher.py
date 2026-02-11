@@ -230,12 +230,16 @@ class LauncherApp:
         self.version_box = None  # Will be set in UI build
         self.branding_map = {
             "TardQuest": (
-                "TARDQUEST EXTRA TARDED EDITION",
+                "TARDQUEST EXTRA 'TARDED EDITION",
                 "A  D I C E Y  D U N G E O N  C R A W L E R",
             ),
             "TurdQuest": (
                 "TURDQUEST GANKED EDITION",
                 "A  C E N S O R E D  D U N G E O N  C R A W L E R",
+            ),
+            "TardQuest Online II": (
+                "TARDQUEST ONLINE II",
+                "A   R E A L M   U N B O R N",
             ),
         }
         self._build_ui()
