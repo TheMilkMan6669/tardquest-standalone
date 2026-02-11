@@ -5,7 +5,7 @@ pyinstaller ^
   --noconfirm ^
   --onefile ^
   --windowed ^
-  --name "TurdQuest Launcher" ^
+  --name "TQ Launcher" ^
   --icon icon.ico ^
   --add-data "icon.ico;." ^
   launcher.py

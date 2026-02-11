@@ -17,7 +17,7 @@ import tkinter.font as tkfont
 from tkinter import filedialog, scrolledtext, ttk, messagebox
 
 # Constants
-MANIFEST_URL = os.getenv("TQ_LAUNCHER_MANIFEST_URL", "https://vocapepper.com/programs/turdquest/update/win/manifest.json")
+MANIFEST_URL = os.getenv("TQ_LAUNCHER_MANIFEST_URL", "https://tardquest.online/update/standalone/win.json")
 EXE_PATTERN = re.compile(
     r"(?:Turd|Tard)Quest-(\d+\.\d+\.\d+(?:[-+][A-Za-z0-9_.-]+)?)-x64\.exe"
 )
@@ -218,11 +218,13 @@ class LauncherApp:
         self.local_version_var = tk.StringVar(value=self.state.local_version or "unknown")
         self.remote_version_var = tk.StringVar(value="unknown")
         self.install_dir_var = tk.StringVar(value=str(self.state.install_dir))
+        self.install_path_var = tk.StringVar(value="")
         self.manifest_index: Optional[ManifestIndex] = None
         self.manifest: Optional[Manifest] = None
         self.update_available = False
         self.update_btn = None  # Will be set in UI build
         self.play_btn = None  # Will be set in UI build
+        self._download_progress_bucket = -10
         self.brand_var = tk.StringVar(value=self.state.brand or "TardQuest")
         self.version_var = tk.StringVar(value="")
         self.version_box = None  # Will be set in UI build
@@ -237,6 +239,7 @@ class LauncherApp:
             ),
         }
         self._build_ui()
+        self._sync_install_path_display()
         self._refresh_local_version()
         self._start_check()
 
@@ -405,7 +408,7 @@ class LauncherApp:
 
         path_row = tk.Frame(path_section, bg=bg_panel)
         path_row.pack(fill="x")
-        entry = ttk.Entry(path_row, textvariable=self.install_dir_var)
+        entry = ttk.Entry(path_row, textvariable=self.install_path_var, state="readonly")
         entry.pack(side="left", fill="x", expand=True, padx=(0, 6))
         browse_btn = ttk.Button(path_row, text="Browse", command=self._browse_install_dir)
         browse_btn.pack(side="right")
@@ -446,11 +449,12 @@ class LauncherApp:
         path = filedialog.askdirectory()
         if path:
             self.install_dir_var.set(path)
+            self._sync_install_path_display()
             self._refresh_local_version()
             self._save_state()
 
     def _refresh_local_version(self) -> None:
-        install_dir = Path(self.install_dir_var.get())
+        install_dir = self._get_brand_install_dir()
         selected_version = self.version_var.get()
         if selected_version:
             exe_path = find_exe_for_version(install_dir, selected_version)
@@ -490,9 +494,7 @@ class LauncherApp:
 
         self._populate_versions_for_brand()
         latest_manifest = self._get_latest_manifest_for_brand(self.brand_var.get())
-        if latest_manifest:
-            self._log(f"Remote version: {latest_manifest.version}")
-        install_dir = Path(self.install_dir_var.get())
+        install_dir = self._get_brand_install_dir()
         _, local_version = find_existing_exe(install_dir)
         if local_version:
             self.local_version_var.set(local_version)
@@ -505,6 +507,15 @@ class LauncherApp:
             return
 
         self.manifest = latest_manifest
+
+        if self._has_installed_version(latest_manifest.version):
+            self.local_version_var.set(latest_manifest.version)
+            self.state.local_version = latest_manifest.version
+            self._save_state()
+            self._set_status("Up to date")
+            self._log("Already on latest version")
+            self._set_update_available(False)
+            return
 
         if not is_remote_newer(latest_manifest.version, local_version):
             self._set_status("Up to date")
@@ -520,6 +531,7 @@ class LauncherApp:
         title, subtitle = self.branding_map.get(self.brand_var.get(), self.branding_map["TurdQuest"])
         self.title_label.configure(text=title)
         self.subtitle_label.configure(text=subtitle)
+        self._sync_install_path_display()
 
     def _on_brand_change(self, *_) -> None:
         self._update_branding()
@@ -592,7 +604,7 @@ class LauncherApp:
             self._on_version_change()
 
     def _evaluate_update_status(self) -> None:
-        install_dir = Path(self.install_dir_var.get())
+        install_dir = self._get_brand_install_dir()
         selected_version = self.version_var.get()
         if selected_version:
             local_version = selected_version if find_exe_for_version(install_dir, selected_version) else None
@@ -600,6 +612,10 @@ class LauncherApp:
             _, local_version = find_existing_exe(install_dir)
         if not self.manifest:
             self._set_status("No builds for selected brand")
+            self._set_update_available(False)
+            return
+        if self._has_installed_version(self.manifest.version):
+            self._set_status("Up to date")
             self._set_update_available(False)
             return
         if not is_remote_newer(self.manifest.version, local_version):
@@ -617,8 +633,12 @@ class LauncherApp:
                 self.update_btn.configure(state=tk.NORMAL if available else tk.DISABLED)
         self.root.after(0, apply_state)
 
+    def _has_installed_version(self, version: str) -> bool:
+        install_dir = self._get_brand_install_dir()
+        return find_exe_for_version(install_dir, version) is not None
+
     def _update_play_state(self) -> None:
-        install_dir = Path(self.install_dir_var.get())
+        install_dir = self._get_brand_install_dir()
         selected_version = self.version_var.get()
         if selected_version:
             has_exe = find_exe_for_version(install_dir, selected_version) is not None
@@ -658,10 +678,11 @@ class LauncherApp:
         if not manifest:
             self._log("No update manifest to download")
             return
-        install_dir = Path(self.install_dir_var.get())
+        install_dir = self._get_brand_install_dir()
         try:
             self._set_status("Downloading update...")
             self._set_progress(0)
+            self._download_progress_bucket = -10
             self._download_and_apply(manifest, install_dir)
         except Exception as exc:
             self._log(f"Download failed: {exc}")
@@ -679,7 +700,12 @@ class LauncherApp:
         with tempfile.TemporaryDirectory() as tmpdir:
             temp_path = Path(tmpdir) / manifest.file_name
             self._log(f"Downloading {manifest.file_name}")
-            download_file(manifest.download_url, temp_path, progress_cb=self._set_progress, size_hint=manifest.size)
+            self._log("Download progress: 0%")
+            self._download_progress_bucket = 0
+            download_file(manifest.download_url, temp_path, progress_cb=self._handle_download_progress, size_hint=manifest.size)
+            if self._download_progress_bucket < 100:
+                self._download_progress_bucket = 100
+                self._log("Download progress: 100%")
 
             if manifest.sha256:
                 self._set_status("Verifying file...")
@@ -705,7 +731,7 @@ class LauncherApp:
         self._update_play_state()
 
     def _start_game(self) -> None:
-        install_dir = Path(self.install_dir_var.get())
+        install_dir = self._get_brand_install_dir()
         self._refresh_local_version()
         selected_version = self.version_var.get()
         if selected_version:
@@ -737,6 +763,22 @@ class LauncherApp:
             self.log_box.see(tk.END)
             self.log_box.configure(state=tk.DISABLED)
         self.root.after(0, append)
+
+    def _handle_download_progress(self, fraction: float) -> None:
+        self._set_progress(fraction)
+        percent = int(max(0.0, min(1.0, fraction)) * 100)
+        bucket = min(100, (percent // 10) * 10)
+        if bucket != self._download_progress_bucket:
+            self._download_progress_bucket = bucket
+            self._log(f"Download progress: {bucket}%")
+
+    def _get_brand_install_dir(self) -> Path:
+        base_dir = Path(self.install_dir_var.get())
+        brand = self.brand_var.get().strip() or "TardQuest"
+        return base_dir / brand
+
+    def _sync_install_path_display(self) -> None:
+        self.install_path_var.set(str(self._get_brand_install_dir()))
 
     def run(self) -> None:
         self.root.mainloop()
