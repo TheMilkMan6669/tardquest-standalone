@@ -215,7 +215,7 @@ class LauncherApp:
         
         self.state = LauncherState.load()
         self.latest_exe_path: Optional[Path] = None
-        self.progress_var = tk.DoubleVar(value=0.0)
+        self.progress_var = tk.IntVar(value=0)
         self.local_version_var = tk.StringVar(value=self.state.local_version or "unknown")
         self.remote_version_var = tk.StringVar(value="unknown")
         self.install_dir_var = tk.StringVar(value=str(self.state.install_dir))
@@ -453,14 +453,20 @@ class LauncherApp:
         self.play_btn = ttk.Button(action_section, text="▶ PLAY", style="Play.TButton", command=self._start_game)
         self.play_btn.pack(fill="x")
 
-        footer = tk.Frame(main, bg=bg_panel, highlightbackground=border_color, highlightthickness=1, height=30)
+        footer = tk.Frame(main, bg=bg_panel, highlightbackground=border_color, highlightthickness=1)
         footer.grid(row=2, column=0, sticky="ew")
-        footer.pack_propagate(False)
 
         footer_inner = tk.Frame(footer, bg=bg_panel)
         footer_inner.pack(fill="x", padx=10, pady=10)
 
-        self.progress = ttk.Progressbar(footer_inner, orient="horizontal", mode="determinate", variable=self.progress_var, maximum=1.0)
+        self.progress = ttk.Progressbar(
+            footer_inner,
+            orient="horizontal",
+            mode="determinate",
+            variable=self.progress_var,
+            maximum=100,
+            style="Horizontal.TProgressbar",
+        )
         self.progress.pack(fill="x")
 
         self._update_branding()
@@ -573,6 +579,9 @@ class LauncherApp:
             self.version_box.selection_clear()
         label = self.version_display_var.get()
         version = self._version_display_map.get(label, label)
+        # Selecting a different version should reset download progress.
+        self._download_progress_bucket = -10
+        self._set_progress(0)
         if version != self.version_var.get():
             self.version_var.set(version)
         self.version_display_var.set(version)
@@ -877,7 +886,19 @@ class LauncherApp:
     # ───────────────────────────────
     def _set_progress(self, value: float) -> None:
         clamped = max(0.0, min(1.0, value))
-        self.root.after(0, self.progress_var.set, clamped)
+        percent = int(round(clamped * 100))
+        def apply() -> None:
+            self.progress_var.set(percent)
+            # On some Tk builds the Progressbar doesn't always repaint when only
+            # the linked variable changes, so set the widget value as well.
+            if getattr(self, "progress", None) is not None:
+                try:
+                    self.progress.configure(value=percent, maximum=100)
+                    self.progress.update_idletasks()
+                except Exception:
+                    pass
+
+        self.root.after(0, apply)
 
     def _run_on_ui_thread(self, func, *args) -> None:
         self.root.after(0, func, *args)
