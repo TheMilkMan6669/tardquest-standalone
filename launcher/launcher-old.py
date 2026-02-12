@@ -17,7 +17,7 @@ import tkinter.font as tkfont
 from tkinter import filedialog, scrolledtext, ttk, messagebox
 
 # Constants
-MANIFEST_URL = "https://vocapepper.com:9601/api/launcher-win64"
+MANIFEST_URL = os.getenv("TQ_LAUNCHER_MANIFEST_URL", "https://tardquest.online/update/standalone/win.json")
 EXE_PATTERN = re.compile(
     r"(?:Turd|Tard)Quest-(\d+\.\d+\.\d+(?:[-+][A-Za-z0-9_.-]+)?)-x64\.exe"
 )
@@ -199,23 +199,22 @@ def extract_zip(archive: Path, dest_dir: Path) -> None:
 
 
 class LauncherApp:
-    # ───────────────────────────────
-    # Initialization & UI construction
-    # ───────────────────────────────
     def __init__(self) -> None:
         self.root = tk.Tk()
         self.root.title("TQ Launcher")
         
+        # Load icon if available
         icon_path = Path(__file__).resolve().parent / "icon.ico"
         if icon_path.exists():
             try:
                 self.root.iconbitmap(str(icon_path))
             except Exception:
-                pass
+                pass  # Icon load failure is non-critical
         
         self.state = LauncherState.load()
         self.latest_exe_path: Optional[Path] = None
         self.progress_var = tk.DoubleVar(value=0.0)
+        self.status_var = tk.StringVar(value="Idle")
         self.local_version_var = tk.StringVar(value=self.state.local_version or "unknown")
         self.remote_version_var = tk.StringVar(value="unknown")
         self.install_dir_var = tk.StringVar(value=str(self.state.install_dir))
@@ -223,18 +222,12 @@ class LauncherApp:
         self.manifest_index: Optional[ManifestIndex] = None
         self.manifest: Optional[Manifest] = None
         self.update_available = False
-        self.update_btn = None
-        self.play_btn = None
+        self.update_btn = None  # Will be set in UI build
+        self.play_btn = None  # Will be set in UI build
         self._download_progress_bucket = -10
         self.brand_var = tk.StringVar(value=self.state.brand or "TardQuest")
         self.version_var = tk.StringVar(value="")
-        self.version_display_var = tk.StringVar(value="")
-        self.version_box = None
-        self.game_info_box = None
-        self._version_display_map: dict[str, str] = {}
-        self.game_process: Optional[subprocess.Popen] = None
-        self._game_poll_job: Optional[str] = None
-        self.game_running_var = tk.StringVar(value="")
+        self.version_box = None  # Will be set in UI build
         self.branding_map = {
             "TardQuest": (
                 "TARDQUEST EXTRA 'TARDED EDITION",
@@ -269,6 +262,7 @@ class LauncherApp:
         self.root.geometry("900x600")
         self.root.resizable(False, False)
 
+        # Font selection
         available = set(tkfont.families())
         font_family = DEFAULT_FONT_FAMILY if DEFAULT_FONT_FAMILY in available else FALLBACK_FONT_FAMILY
         font_small = (font_family, 9)
@@ -282,36 +276,25 @@ class LauncherApp:
         style.configure("Dim.TLabel", background=bg_panel, foreground=text_dim, font=font_small)
         style.configure("Title.TLabel", background=bg_panel, foreground=accent, font=font_large)
         style.configure("Subtitle.TLabel", background=bg_panel, foreground=text_dim, font=font_subtitle)
-        style.configure("Running.TLabel", background=bg_panel, foreground=accent, font=font_small)
+        style.configure("Status.TLabel", background=bg_panel, foreground=accent, font=font_normal)
         style.configure("TButton", background=btn_bg, foreground=text_main, font=font_normal, borderwidth=1, relief="flat", padding=(16, 8))
         style.map("TButton", background=[("active", btn_hover), ("pressed", btn_hover)])
         style.configure("Play.TButton", background=accent, foreground=bg_dark, font=(font_family, 12, "bold"), padding=(32, 12))
         style.map("Play.TButton", background=[("active", "#e0e0e0"), ("pressed", "#cccccc")])
         style.configure("TEntry", fieldbackground=bg_dark, foreground=text_main, insertcolor=text_main, font=font_normal, padding=6)
         style.configure("Horizontal.TProgressbar", troughcolor=border_color, background=progress_fill, bordercolor=border_color, lightcolor=progress_fill, darkcolor=progress_fill, thickness=8)
-        style.configure("TCombobox", fieldbackground=bg_panel, background=bg_panel, foreground=text_main, arrowcolor=text_main, padding=4)
-        style.map("TCombobox", fieldbackground=[("readonly", bg_panel)], background=[("readonly", bg_panel)], foreground=[("readonly", text_main)])
         style.configure("Brand.TCombobox", fieldbackground=bg_panel, background=bg_panel, foreground=text_main, arrowcolor=text_main, padding=4)
         style.map("Brand.TCombobox", fieldbackground=[("readonly", bg_panel)], background=[("readonly", bg_panel)], foreground=[("readonly", text_main)])
-        style.configure("TNotebook", background=bg_panel, borderwidth=0)
-        style.configure("TNotebook.Tab", background=bg_panel, foreground=text_dim, padding=(10, 6))
-        style.map("TNotebook.Tab", background=[("selected", bg_dark)], foreground=[("selected", accent)])
 
-        self.root.option_add("*TCombobox*Listbox.background", bg_dark)
-        self.root.option_add("*TCombobox*Listbox.foreground", text_main)
-        self.root.option_add("*TCombobox*Listbox.selectBackground", btn_hover)
-        self.root.option_add("*TCombobox*Listbox.selectForeground", text_main)
-        self.root.option_add("*TCombobox*Listbox.borderWidth", 0)
-
+        # Main container
         main = tk.Frame(self.root, bg=bg_dark)
         main.pack(fill="both", expand=True, padx=20, pady=20)
-        main.columnconfigure(0, weight=1)
-        main.rowconfigure(0, weight=0)
-        main.rowconfigure(1, weight=1)
-        main.rowconfigure(2, weight=0)
 
+        # ═══════════════════════════════════════════════════════════════════
+        # HEADER: Title banner
+        # ═══════════════════════════════════════════════════════════════════
         header = tk.Frame(main, bg=bg_panel, highlightbackground=border_color, highlightthickness=1)
-        header.grid(row=0, column=0, sticky="ew", pady=(0, 12))
+        header.pack(fill="x", pady=(0, 12))
 
         header_inner = tk.Frame(header, bg=bg_panel)
         header_inner.pack(fill="x", padx=20, pady=16)
@@ -322,8 +305,10 @@ class LauncherApp:
         self.title_label.pack(anchor="w")
         self.subtitle_label = ttk.Label(title_frame, text="", style="Subtitle.TLabel")
         self.subtitle_label.pack(anchor="w", pady=(2, 0))
-        self.running_label = ttk.Label(title_frame, textvariable=self.game_running_var, style="Running.TLabel")
-        self.running_label.pack(anchor="w", pady=(6, 0))
+
+        status_frame = tk.Frame(header_inner, bg=bg_panel)
+        status_frame.pack(side="right", padx=(20, 0))
+        ttk.Label(status_frame, textvariable=self.status_var, style="Status.TLabel").pack(anchor="e")
 
         brand_frame = tk.Frame(header_inner, bg=bg_panel)
         brand_frame.pack(side="right", padx=(8, 0))
@@ -338,31 +323,32 @@ class LauncherApp:
             style="Brand.TCombobox",
         )
         combobox.pack(side="left")
+        # Clear text selection when the combobox is focused or a selection is made
         combobox.bind("<<ComboboxSelected>>", lambda e: combobox.selection_clear())
         combobox.bind("<FocusIn>", lambda e: combobox.selection_clear())
         self.brand_var.trace_add("write", self._on_brand_change)
         self.version_var.trace_add("write", self._on_version_change)
 
 
+        # ═══════════════════════════════════════════════════════════════════
+        # CONTENT: Split into left info panel and right action panel
+        # ═══════════════════════════════════════════════════════════════════
         content = tk.Frame(main, bg=bg_dark)
-        content.grid(row=1, column=0, sticky="nsew", pady=(0, 12))
+        content.pack(fill="both", expand=True, pady=(0, 12))
         content.columnconfigure(0, weight=2)
         content.columnconfigure(1, weight=1)
         content.rowconfigure(0, weight=1)
 
+        # Left panel: Log
         left_panel = tk.Frame(content, bg=bg_panel, highlightbackground=border_color, highlightthickness=1)
         left_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
 
-        log_tabs = ttk.Notebook(left_panel)
-        log_tabs.pack(fill="both", expand=True, padx=12, pady=12)
-
-        log_tab = tk.Frame(log_tabs, bg=bg_panel)
-        info_tab = tk.Frame(log_tabs, bg=bg_panel)
-        log_tabs.add(log_tab, text="Activity Log")
-        log_tabs.add(info_tab, text="Release Notes")
+        log_header = tk.Frame(left_panel, bg=bg_panel)
+        log_header.pack(fill="x", padx=16, pady=(12, 8))
+        ttk.Label(log_header, text="ACTIVITY LOG", style="Dim.TLabel").pack(anchor="w")
 
         self.log_box = scrolledtext.ScrolledText(
-            log_tab,
+            left_panel,
             background=bg_dark,
             foreground=text_dim,
             insertbackground=text_main,
@@ -374,27 +360,13 @@ class LauncherApp:
             padx=8,
             pady=8,
         )
-        self.log_box.pack(fill="both", expand=True, padx=8, pady=8)
+        self.log_box.pack(fill="both", expand=True, padx=16, pady=(0, 16))
 
-        self.game_info_box = scrolledtext.ScrolledText(
-            info_tab,
-            background=bg_dark,
-            foreground=text_dim,
-            insertbackground=text_main,
-            font=font_small,
-            state=tk.DISABLED,
-            relief="flat",
-            borderwidth=0,
-            highlightthickness=0,
-            padx=8,
-            pady=8,
-            wrap=tk.WORD,
-        )
-        self.game_info_box.pack(fill="both", expand=True, padx=8, pady=8)
-
+        # Right panel: Version info and actions
         right_panel = tk.Frame(content, bg=bg_panel, highlightbackground=border_color, highlightthickness=1)
         right_panel.grid(row=0, column=1, sticky="nsew", padx=(8, 0))
 
+        # Version section
         version_section = tk.Frame(right_panel, bg=bg_panel)
         version_section.pack(fill="x", padx=16, pady=(16, 12))
 
@@ -403,14 +375,18 @@ class LauncherApp:
         ver_grid = tk.Frame(version_section, bg=bg_panel)
         ver_grid.pack(fill="x")
 
+        ttk.Label(ver_grid, text="Installed:", style="Dim.TLabel").grid(row=0, column=0, sticky="w", pady=2)
+        self.local_version_label = ttk.Label(ver_grid, textvariable=self.local_version_var)
+        self.local_version_label.grid(row=0, column=1, sticky="e", pady=2, padx=(8, 0))
+
         ttk.Label(ver_grid, text="Latest:", style="Dim.TLabel").grid(row=1, column=0, sticky="w", pady=2)
         self.remote_version_label = ttk.Label(ver_grid, textvariable=self.remote_version_var)
         self.remote_version_label.grid(row=1, column=1, sticky="e", pady=2, padx=(8, 0))
 
-        ttk.Label(ver_grid, text="Choose Build:", style="Dim.TLabel").grid(row=2, column=0, sticky="w", pady=2)
+        ttk.Label(ver_grid, text="Selected:", style="Dim.TLabel").grid(row=2, column=0, sticky="w", pady=2)
         self.version_box = ttk.Combobox(
             ver_grid,
-            textvariable=self.version_display_var,
+            textvariable=self.version_var,
             values=[],
             state="disabled",
             width=16,
@@ -418,14 +394,17 @@ class LauncherApp:
             style="Brand.TCombobox",
         )
         self.version_box.grid(row=2, column=1, sticky="e", pady=2, padx=(8, 0))
-        self.version_box.bind("<<ComboboxSelected>>", self._on_version_display_select)
+        # Prevent the combobox entry text from being highlighted after selection
+        self.version_box.bind("<<ComboboxSelected>>", lambda _: self.version_box.selection_clear() if self.version_box else None)
         self.version_box.bind("<FocusIn>", lambda _: self.version_box.selection_clear() if self.version_box else None)
 
         ver_grid.columnconfigure(1, weight=1)
 
+        # Separator
         sep = tk.Frame(right_panel, bg=border_color, height=1)
         sep.pack(fill="x", padx=16, pady=12)
 
+        # Install path section
         path_section = tk.Frame(right_panel, bg=bg_panel)
         path_section.pack(fill="x", padx=16, pady=(0, 12))
 
@@ -438,44 +417,45 @@ class LauncherApp:
         browse_btn = ttk.Button(path_row, text="Browse", command=self._browse_install_dir)
         browse_btn.pack(side="right")
 
+        # Spacer
         spacer = tk.Frame(right_panel, bg=bg_panel)
         spacer.pack(fill="both", expand=True)
 
+        # Action buttons
         action_section = tk.Frame(right_panel, bg=bg_panel)
         action_section.pack(fill="x", padx=16, pady=(0, 16))
 
         check_btn = ttk.Button(action_section, text="Check for Updates", command=self._start_check)
         check_btn.pack(fill="x", pady=(0, 8))
 
-        self.update_btn = ttk.Button(action_section, text="Download", command=self._start_download, state=tk.DISABLED)
+        self.update_btn = ttk.Button(action_section, text="Download Release", command=self._start_download, state=tk.DISABLED)
         self.update_btn.pack(fill="x", pady=(0, 8))
 
-        self.play_btn = ttk.Button(action_section, text="▶ PLAY", style="Play.TButton", command=self._start_game)
+        self.play_btn = ttk.Button(action_section, text="▶  PLAY", style="Play.TButton", command=self._start_game)
         self.play_btn.pack(fill="x")
 
-        footer = tk.Frame(main, bg=bg_panel, highlightbackground=border_color, highlightthickness=1, height=30)
-        footer.grid(row=2, column=0, sticky="ew")
-        footer.pack_propagate(False)
+        # ═══════════════════════════════════════════════════════════════════
+        # FOOTER: Progress bar
+        # ═══════════════════════════════════════════════════════════════════
+        footer = tk.Frame(main, bg=bg_panel, highlightbackground=border_color, highlightthickness=1)
+        footer.pack(fill="x")
 
         footer_inner = tk.Frame(footer, bg=bg_panel)
-        footer_inner.pack(fill="x", padx=10, pady=10)
+        footer_inner.pack(fill="x", padx=16, pady=12)
 
         self.progress = ttk.Progressbar(footer_inner, orient="horizontal", mode="determinate", variable=self.progress_var, maximum=1.0)
         self.progress.pack(fill="x")
 
         self._update_branding()
         self._populate_versions_for_brand()
-        self._refresh_ui(update_status=False)
 
-    # ───────────────────────────────
-    # Version selection & state
-    # ───────────────────────────────
     def _browse_install_dir(self) -> None:
         path = filedialog.askdirectory()
         if path:
             self.install_dir_var.set(path)
             self._sync_install_path_display()
-            self._refresh_ui()
+            self._refresh_local_version()
+            self._save_state()
 
     def _refresh_local_version(self) -> None:
         install_dir = self._get_brand_install_dir()
@@ -494,6 +474,7 @@ class LauncherApp:
             self.state.local_version = None
             self.latest_exe_path = None
         self._save_state()
+        self._update_play_state()
 
     def _save_state(self) -> None:
         self.state.install_dir = Path(self.install_dir_var.get())
@@ -504,41 +485,51 @@ class LauncherApp:
         threading.Thread(target=self._check_updates, daemon=True).start()
 
     def _check_updates(self) -> None:
-        self._log("Fetching manifest...")
+        self._set_status("Fetching manifest...")
         self._set_progress(0)
         try:
             manifest_index = fetch_manifest(MANIFEST_URL)
+            self.manifest_index = manifest_index
         except Exception as exc:
             self._log(f"Failed to fetch manifest: {exc}")
+            self._set_status("Manifest fetch failed")
             self._set_update_available(False)
             return
 
-        self._run_on_ui_thread(self._apply_manifest_index, manifest_index)
-
-    def _apply_manifest_index(self, manifest_index: ManifestIndex) -> None:
-        self.manifest_index = manifest_index
         self._populate_versions_for_brand()
         latest_manifest = self._get_latest_manifest_for_brand(self.brand_var.get())
+        install_dir = self._get_brand_install_dir()
+        _, local_version = find_existing_exe(install_dir)
+        if local_version:
+            self.local_version_var.set(local_version)
+            self.state.local_version = local_version
+            self._save_state()
 
         if not latest_manifest:
-            self._log("No builds for selected edition")
-            self.manifest = None
+            self._set_status("No builds for selected brand")
             self._set_update_available(False)
-            self._refresh_ui(update_status=False)
             return
 
-        selected_version = self.version_var.get()
-        entries = self._get_sorted_versions(self.brand_var.get())
-        selected_manifest = next((entry for entry in entries if entry.version == selected_version), None)
-        self.manifest = selected_manifest or latest_manifest
+        self.manifest = latest_manifest
 
-        self._refresh_ui(update_status=True)
-        if self._is_selected_version_installed():
-            self._log("Up to date")
-        elif self.update_available:
-            self._log("Update available")
-        else:
-            self._log("Up to date")
+        if self._has_installed_version(latest_manifest.version):
+            self.local_version_var.set(latest_manifest.version)
+            self.state.local_version = latest_manifest.version
+            self._save_state()
+            self._set_status("Up to date")
+            self._log("Already on latest version")
+            self._set_update_available(False)
+            return
+
+        if not is_remote_newer(latest_manifest.version, local_version):
+            self._set_status("Up to date")
+            self._log("Already on latest version")
+            self._set_update_available(False)
+            return
+
+        self._set_status("Update available")
+        self._log(f"Update available: {self.manifest.version}")
+        self._set_update_available(True)
 
     def _update_branding(self) -> None:
         title, subtitle = self.branding_map.get(self.brand_var.get(), self.branding_map["TurdQuest"])
@@ -558,24 +549,16 @@ class LauncherApp:
             self.remote_version_var.set("unknown")
             self._set_update_available(False)
             self._update_play_state()
-            self._update_game_info()
-            self._update_release_action()
             return
         brand = self.brand_var.get()
         entries = self._get_sorted_versions(brand)
         selected = self.version_var.get()
         self.manifest = next((entry for entry in entries if entry.version == selected), None)
-        # Keep the Latest label pinned to the newest remote build.
-        self._refresh_ui()
-
-    def _on_version_display_select(self, event: Optional[tk.Event] = None) -> None:
-        if self.version_box:
-            self.version_box.selection_clear()
-        label = self.version_display_var.get()
-        version = self._version_display_map.get(label, label)
-        if version != self.version_var.get():
-            self.version_var.set(version)
-        self.version_display_var.set(version)
+        # Keep the 'Latest' label showing the newest available build for the
+        # brand. Do not overwrite it when the user selects a different version.
+        self._refresh_local_version()
+        self._evaluate_update_status()
+        self._update_play_state()
 
     def _get_sorted_versions(self, brand: str) -> list[Manifest]:
         if not self.manifest_index:
@@ -593,32 +576,21 @@ class LauncherApp:
             return
         entries = self._get_sorted_versions(self.brand_var.get())
         versions = [entry.version for entry in entries]
-        install_dir = self._get_brand_install_dir()
-        installed_versions = {
-            version for version in versions if find_exe_for_version(install_dir, version) is not None
-        }
-        self._version_display_map = {
-            (f"{version} (Installed)" if version in installed_versions else version): version
-            for version in versions
-        }
-        display_versions = list(self._version_display_map.keys())
         self.version_box.configure(state="readonly" if versions else "disabled")
-        self.version_box["values"] = display_versions
+        self.version_box["values"] = versions
         if versions:
             if self.version_var.get() not in versions:
                 self.version_var.set(versions[0])
-            self.version_display_var.set(self.version_var.get())
-            # Latest always reflects the newest remote build.
+            # Ensure the 'Latest' label always shows the newest available build
             latest = self._get_latest_manifest_for_brand(self.brand_var.get())
             if latest:
                 self.remote_version_var.set(latest.version)
         else:
             self.version_var.set("")
-            self.version_display_var.set("")
-            self._version_display_map = {}
             self.manifest = None
             self.remote_version_var.set("unknown")
             self._set_update_available(False)
+        self._update_play_state()
 
     def _force_select_version_for_brand(self) -> None:
         entries = self._get_sorted_versions(self.brand_var.get())
@@ -627,7 +599,7 @@ class LauncherApp:
             self.manifest = None
             self.remote_version_var.set("unknown")
             self._set_update_available(False)
-            self._refresh_ui(update_status=False)
+            self._update_play_state()
             return
         latest_version = entries[0].version
         if self.version_var.get() != latest_version:
@@ -643,20 +615,27 @@ class LauncherApp:
         else:
             _, local_version = find_existing_exe(install_dir)
         if not self.manifest:
+            self._set_status("No builds for selected brand")
             self._set_update_available(False)
             return
         if self._has_installed_version(self.manifest.version):
+            self._set_status("Up to date")
             self._set_update_available(False)
             return
         if not is_remote_newer(self.manifest.version, local_version):
+            self._set_status("Up to date")
             self._set_update_available(False)
         else:
+            self._set_status("Update available")
             self._set_update_available(True)
 
     def _set_update_available(self, available: bool) -> None:
-        """Cache update availability and refresh the action button state."""
+        """Enable or disable the 'Download Update' button on the UI thread."""
         self.update_available = available
-        self._update_release_action()
+        def apply_state() -> None:
+            if self.update_btn:
+                self.update_btn.configure(state=tk.NORMAL if available else tk.DISABLED)
+        self.root.after(0, apply_state)
 
     def _has_installed_version(self, version: str) -> bool:
         install_dir = self._get_brand_install_dir()
@@ -669,68 +648,22 @@ class LauncherApp:
             has_exe = find_exe_for_version(install_dir, selected_version) is not None
         else:
             has_exe = self.latest_exe_path is not None and self.latest_exe_path.exists()
-        running = self._is_game_running()
 
         def apply_state() -> None:
             if self.play_btn:
-                self.play_btn.configure(state=tk.NORMAL if has_exe and not running else tk.DISABLED)
+                self.play_btn.configure(state=tk.NORMAL if has_exe else tk.DISABLED)
 
         self.root.after(0, apply_state)
 
-    def _is_game_running(self) -> bool:
-        return self.game_process is not None and self.game_process.poll() is None
-
-    def _is_selected_version_installed(self) -> bool:
-        install_dir = self._get_brand_install_dir()
-        selected_version = self.version_var.get()
-        if selected_version:
-            return find_exe_for_version(install_dir, selected_version) is not None
-        return self.latest_exe_path is not None and self.latest_exe_path.exists()
-
-    def _update_release_action(self) -> None:
-        installed = self._is_selected_version_installed()
-
-        def apply_state() -> None:
-            if not self.update_btn:
-                return
-            if installed:
-                self.update_btn.configure(text="Uninstall", command=self._start_uninstall, state=tk.NORMAL)
-            else:
-                state = tk.NORMAL if self.update_available else tk.DISABLED
-                self.update_btn.configure(text="Download", command=self._start_download, state=state)
-
-        self.root.after(0, apply_state)
-
-    def _update_game_info(self) -> None:
-        notes = None
-        if self.manifest and self.manifest.release_notes:
-            notes = self.manifest.release_notes.strip()
-        if not notes:
-            notes = "No release notes available for the selected version."
-
-        def apply_text() -> None:
-            if not self.game_info_box:
-                return
-            self.game_info_box.configure(state=tk.NORMAL)
-            self.game_info_box.delete("1.0", tk.END)
-            self.game_info_box.insert(tk.END, notes + "\n")
-            self.game_info_box.see("1.0")
-            self.game_info_box.configure(state=tk.DISABLED)
-
-        self.root.after(0, apply_text)
-
-    # ───────────────────────────────
-    # Install / uninstall / launch actions
-    # ───────────────────────────────
     def _confirm_download(self, manifest: Manifest) -> bool:
         """Show a confirmation dialog to the user before downloading."""
-        title = "Download"
-        msg = f"Download and install version {manifest.version}?"
-        return messagebox.askyesno(title, msg)
-
-    def _confirm_uninstall(self, version: str) -> bool:
-        title = "Uninstall Release"
-        msg = f"Remove installed version {version}?"
+        title = "Download Update"
+        msg = f"Download and install version {manifest.version}?\n\nFile: {manifest.file_name}"
+        if manifest.release_notes:
+            # Keep release notes short in the confirmation if present
+            notes = manifest.release_notes.strip()
+            if notes:
+                msg += f"\n\nRelease notes:\n{notes}"
         return messagebox.askyesno(title, msg)
 
     def _start_download(self) -> None:
@@ -740,34 +673,9 @@ class LauncherApp:
             return
         if not self._confirm_download(self.manifest):
             self._log("Download cancelled by user")
+            self._set_status("Idle")
             return
         threading.Thread(target=self._download_update, daemon=True).start()
-
-    def _start_uninstall(self) -> None:
-        selected_version = self.version_var.get() or self.state.local_version
-        if not selected_version:
-            self._log("No installed build to uninstall")
-            return
-        if not self._confirm_uninstall(selected_version):
-            self._log("Uninstall cancelled by user")
-            return
-        threading.Thread(target=self._uninstall_version, args=(selected_version,), daemon=True).start()
-
-    def _uninstall_version(self, version: str) -> None:
-        install_dir = self._get_brand_install_dir()
-        version_dir = get_version_dir(install_dir, version)
-        try:
-            if version_dir.exists():
-                shutil.rmtree(version_dir)
-            else:
-                exe_path = find_exe_for_version(install_dir, version)
-                if exe_path and exe_path.exists():
-                    exe_path.unlink()
-            self._log(f"Uninstalled {version}")
-        except Exception as exc:
-            self._log(f"Uninstall failed: {exc}")
-            return
-        self._run_on_ui_thread(self._post_uninstall_refresh)
 
     def _download_update(self) -> None:
         manifest = self.manifest
@@ -776,16 +684,18 @@ class LauncherApp:
             return
         install_dir = self._get_brand_install_dir()
         try:
-            self._log("Downloading update...")
+            self._set_status("Downloading update...")
             self._set_progress(0)
             self._download_progress_bucket = -10
             self._download_and_apply(manifest, install_dir)
         except Exception as exc:
             self._log(f"Download failed: {exc}")
+            self._set_status("Download failed")
             return
         self._log("Update applied")
+        self._set_status("Update installed")
         self._set_update_available(False)
-        self._run_on_ui_thread(self._post_download_refresh)
+        self._refresh_local_version()
 
     def _download_and_apply(self, manifest: Manifest, install_dir: Path) -> None:
         install_dir.mkdir(parents=True, exist_ok=True)
@@ -802,13 +712,13 @@ class LauncherApp:
                 self._log("Download progress: 100%")
 
             if manifest.sha256:
-                self._log("Verifying file...")
+                self._set_status("Verifying file...")
                 actual = sha256_file(temp_path)
                 if actual.lower() != manifest.sha256.lower():
                     raise ValueError("Hash mismatch; download corrupted")
 
             if temp_path.suffix.lower() == ".zip":
-                self._log("Extracting archive...")
+                self._set_status("Extracting archive...")
                 extract_zip(temp_path, version_dir)
                 extracted_exe = find_exe_for_version(install_dir, manifest.version)
                 if not extracted_exe:
@@ -816,7 +726,7 @@ class LauncherApp:
                 new_exe_path = extracted_exe
             else:
                 final_path = version_dir / manifest.file_name
-                self._log("Placing new build...")
+                self._set_status("Placing new build...")
                 shutil.move(str(temp_path), final_path)
                 new_exe_path = final_path
 
@@ -834,53 +744,21 @@ class LauncherApp:
             exe_path = self.latest_exe_path
         if not exe_path or not exe_path.exists():
             self._log("No game binary found; run update first")
-            self._log("Missing binary")
+            self._set_status("Missing binary")
             return
         try:
-            self.game_process = subprocess.Popen([str(exe_path)], cwd=str(install_dir))
-            self._log("Game started")
-            self._start_game_monitor()
-            self._update_play_state()
+            subprocess.Popen([str(exe_path)], cwd=str(install_dir))
+            self._set_status("Game launched")
         except Exception as exc:
             self._log(f"Failed to launch: {exc}")
-            self._log("Launch failed")
+            self._set_status("Launch failed")
 
-    def _start_game_monitor(self) -> None:
-        if self._game_poll_job:
-            try:
-                self.root.after_cancel(self._game_poll_job)
-            except Exception:
-                pass
-            self._game_poll_job = None
-        self._poll_game_process()
+    def _set_status(self, message: str) -> None:
+        self.root.after(0, self.status_var.set, message)
 
-    def _poll_game_process(self) -> None:
-        proc = self.game_process
-        if not proc:
-            return
-        if proc.poll() is None:
-            self._game_poll_job = self.root.after(1000, self._poll_game_process)
-            return
-        self.game_process = None
-        self._game_poll_job = None
-        self._log("Game stopped")
-        self._update_play_state()
-
-    def _post_uninstall_refresh(self) -> None:
-        self._refresh_ui(rebuild_versions=True)
-
-    def _post_download_refresh(self) -> None:
-        self._refresh_ui(rebuild_versions=True)
-
-    # ───────────────────────────────
-    # UI thread & logging helpers
-    # ───────────────────────────────
     def _set_progress(self, value: float) -> None:
         clamped = max(0.0, min(1.0, value))
         self.root.after(0, self.progress_var.set, clamped)
-
-    def _run_on_ui_thread(self, func, *args) -> None:
-        self.root.after(0, func, *args)
 
     def _log(self, message: str) -> None:
         def append() -> None:
@@ -898,19 +776,6 @@ class LauncherApp:
             self._download_progress_bucket = bucket
             self._log(f"Download progress: {bucket}%")
 
-    def _refresh_ui(self, update_status: bool = True, rebuild_versions: bool = False) -> None:
-        if rebuild_versions:
-            self._populate_versions_for_brand()
-        self._refresh_local_version()
-        if update_status:
-            self._evaluate_update_status()
-        self._update_game_info()
-        self._update_play_state()
-        self._update_release_action()
-
-    # ───────────────────────────────
-    # Paths & app lifecycle
-    # ───────────────────────────────
     def _get_brand_install_dir(self) -> Path:
         base_dir = Path(self.install_dir_var.get())
         brand = self.brand_var.get().strip() or "TardQuest"
