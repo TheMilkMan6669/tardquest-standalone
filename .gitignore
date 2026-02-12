@@ -1,10 +1,13 @@
 # Node modules
 node_modules/
 
-# Electron build output
-TardQuest-win32-x64/
+# Build output
 dist/
 HttpData/GameData/
+package-lock.json
+launcher/build/
+launcher/dist/
+launcher/*.spec
 
 # OS-specific files
 .DS_Store
@@ -19,3 +22,4 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
+launcher/.venv/
