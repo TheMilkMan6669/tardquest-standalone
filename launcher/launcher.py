@@ -1,6 +1,7 @@
 import hashlib
 import json
 import os
+import platform
 import re
 import shutil
 import subprocess
@@ -18,6 +19,18 @@ from tkinter import filedialog, scrolledtext, ttk, messagebox
 
 # Constants
 MANIFEST_URL = "https://vocapepper.com:9601/api/launcher-win64"
+LINUX_MANIFEST_URL = "https://vocapepper.com:9601/api/launcher-linux"
+
+
+def get_manifest_url() -> str:
+    """Return the appropriate manifest URL for the current OS."""
+    try:
+        system = platform.system().lower()
+    except Exception:
+        system = ""
+    if system.startswith("linux"):
+        return LINUX_MANIFEST_URL
+    return MANIFEST_URL
 EXE_PATTERN = re.compile(
     r"(?:Turd|Tard)Quest-(\d+\.\d+\.\d+(?:[-+][A-Za-z0-9_.-]+)?)-x64\.exe"
 )
@@ -122,6 +135,34 @@ def fetch_manifest(url: str) -> ManifestIndex:
     raise ValueError("Manifest missing 'brands' section")
 
 
+def _is_linux() -> bool:
+    try:
+        return platform.system().lower().startswith("linux")
+    except Exception:
+        return False
+
+
+def _find_linux_binary(base_dir: Path) -> Optional[Path]:
+    candidates = ["tardquest"]
+    for name in candidates:
+        direct = base_dir / name
+        if direct.exists() and direct.is_file():
+            return direct
+
+    for path in base_dir.rglob("*"):
+        if path.is_file() and path.name.lower() in candidates:
+            return path
+    return None
+
+
+def _ensure_executable(path: Path) -> None:
+    try:
+        path.chmod(path.stat().st_mode | 0o111)
+    except Exception:
+        # Best effort: launch will still fail with a clear error if this did not work.
+        pass
+
+
 def find_existing_exe(install_dir: Path) -> Tuple[Optional[Path], Optional[str]]:
     if not install_dir.exists():
         return None, None
@@ -140,11 +181,26 @@ def find_existing_exe(install_dir: Path) -> Tuple[Optional[Path], Optional[str]]
             m = EXE_PATTERN.match(path.name)
             if m:
                 matches.append((version_key(m.group(1)), path, m.group(1)))
-    if not matches:
-        return None, None
-    matches.sort(key=lambda item: item[0], reverse=True)
-    _, path, version = matches[0]
-    return path, version
+    if matches:
+        matches.sort(key=lambda item: item[0], reverse=True)
+        _, path, version = matches[0]
+        return path, version
+
+    if _is_linux():
+        linux_matches = []
+        for child in install_dir.iterdir():
+            if not child.is_dir():
+                continue
+            folder_version = child.name
+            binary_path = _find_linux_binary(child)
+            if binary_path:
+                linux_matches.append((version_key(folder_version), binary_path, folder_version))
+        if linux_matches:
+            linux_matches.sort(key=lambda item: item[0], reverse=True)
+            _, path, version = linux_matches[0]
+            return path, version
+
+    return None, None
 
 
 def get_version_dir(install_dir: Path, version: str) -> Path:
@@ -166,6 +222,12 @@ def find_exe_for_version(install_dir: Path, version: str) -> Optional[Path]:
     all_exes = list(version_dir.rglob("*.exe"))
     if len(all_exes) == 1:
         return all_exes[0]
+
+    if _is_linux():
+        binary_path = _find_linux_binary(version_dir)
+        if binary_path:
+            return binary_path
+
     return None
 
 
@@ -266,8 +328,9 @@ class LauncherApp:
         progress_fill = accent
 
         self.root.configure(bg=bg_dark)
-        self.root.geometry("900x600")
-        self.root.resizable(False, False)
+        # Bump size to better accommodate scaling across different systems, and allow resizing for systems like the Steam Deck.
+        self.root.geometry("1024x768")
+        self.root.resizable(True, True)
 
         available = set(tkfont.families())
         font_family = DEFAULT_FONT_FAMILY if DEFAULT_FONT_FAMILY in available else FALLBACK_FONT_FAMILY
@@ -513,7 +576,7 @@ class LauncherApp:
         self._log("Fetching manifest...")
         self._set_progress(0)
         try:
-            manifest_index = fetch_manifest(MANIFEST_URL)
+            manifest_index = fetch_manifest(get_manifest_url())
         except Exception as exc:
             self._log(f"Failed to fetch manifest: {exc}")
             self._set_update_available(False)
@@ -821,12 +884,16 @@ class LauncherApp:
                 extract_zip(temp_path, version_dir)
                 extracted_exe = find_exe_for_version(install_dir, manifest.version)
                 if not extracted_exe:
-                    raise FileNotFoundError("No matching EXE found after extraction")
+                    raise FileNotFoundError("No launch binary found after extraction")
+                if _is_linux():
+                    _ensure_executable(extracted_exe)
                 new_exe_path = extracted_exe
             else:
                 final_path = version_dir / manifest.file_name
                 self._log("Placing new build...")
                 shutil.move(str(temp_path), final_path)
+                if _is_linux():
+                    _ensure_executable(final_path)
                 new_exe_path = final_path
 
         self._set_progress(1.0)
@@ -846,7 +913,14 @@ class LauncherApp:
             self._log("Missing binary")
             return
         try:
-            self.game_process = subprocess.Popen([str(exe_path)], cwd=str(install_dir))
+            launch_cwd = install_dir.resolve()
+            launch_path = exe_path.resolve()
+            if _is_linux():
+                _ensure_executable(launch_path)
+            cmd = [str(launch_path)]
+            if _is_linux():
+                cmd.append("--no-sandbox")
+            self.game_process = subprocess.Popen(cmd, cwd=str(launch_cwd))
             self._log("Game started")
             self._start_game_monitor()
             self._update_play_state()
