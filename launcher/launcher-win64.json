@@ -1,0 +1,207 @@
+{
+  "brands": {
+    "TurdQuest": {
+      "versions": [
+        {
+          "version": "1.20.0",
+          "file_name": "TurdQuest-1.20.0-x64.exe",
+          "download_url": "https://github.com/VocaPepper/turdquest-ge/releases/download/1.20.0/TurdQuest-1.20.0-x64.exe",
+          "sha256": "7487abc73d2152ed2c70ff564d1df48113aef94090033b070075df0ac9b5ab97",
+          "size": 94038371,
+          "release_notes": "(ONLINE FEATURE) Scattered throughout the TardSpire, you will now see gravestones pop up displaying the names of those who have been met with a terrible fate. These names are pulled from the submitted TardBoard scores. (VocaPepper)\n\nParty members can now gain EXP and level up. (Xx_TheMilkMan69_xX)\n\nParty members have been given more detailed character sheets displaying various stats, as well as what line of dialogue you used to persuade them into your party. You can bring this window up simply by clicking on a member's name via the party list. (Xx_TheMilkMan69_xX)\n\nParty members can now be renamed via their respective character sheets. (Xx_TheMilkMan69_xX)\n\nParty members can now be healed by consuming a PHIAL OF SEED via their respective character sheets. These can be purchased from a Merchant or found in chests, but cannot be consumed by the player themself. (Xx_TheMilkMan69_xX)\n\nNew dev API test suite UI overhaul. This is normally only accessible by us, the developers. (VocaPepper)"
+        }
+      ]
+    },
+    "TardQuest Online II": {
+      "versions": []
+    },
+    "TardQuest": {
+      "versions": [
+        {
+          "version": "1.20.0",
+          "file_name": "TardQuest-1.20.0-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.20.0/TardQuest-1.20.0-x64.zip",
+          "sha256": "065685525d533736f01b0ef4a03207036149c693dd9954578a7a502babc9709b",
+          "size": 94097408,
+          "release_notes": "(ONLINE FEATURE) Scattered throughout the TardSpire, you will now see gravestones pop up displaying the names of those who have been met with a terrible fate. These names are pulled from the submitted TardBoard scores. (VocaPepper)\n\nParty members can now gain EXP and level up. (Xx_TheMilkMan69_xX)\n\nParty members have been given more detailed character sheets displaying various stats, as well as what line of dialogue you used to persuade them into your party. You can bring this window up simply by clicking on a member's name via the party list. (Xx_TheMilkMan69_xX)\n\nParty members can now be renamed via their respective character sheets. (Xx_TheMilkMan69_xX)\n\nParty members can now be healed by consuming a PHIAL OF SEED via their respective character sheets. These can be purchased from a Merchant or found in chests, but cannot be consumed by the player themself. (Xx_TheMilkMan69_xX)\n\nNew dev API test suite UI overhaul. This is normally only accessible by us, the developers. (VocaPepper)"
+        },
+        {
+          "version": "1.19.2",
+          "file_name": "TardQuest-1.19.2-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.19.2/TardQuest-1.19.2-x64.zip",
+          "sha256": "0a5e40a505c99a889a5d5f70dc9bd7a45e26066fac8d0646f2dbb35198acb3c4",
+          "size": 94097408,
+          "release_notes": "Added a submenu to the toolbar in Extra 'Tarded Edition for dev tools. This is locked by a password, since it is meant for dev purposes. (Xx_TheMilkMan69_xX)\n\nNew scrollbar styling (Xx_TheMilkMan69_xX)\n\nMoved kill counter to the minimap header and removed the ugly ass footer (Xx_TheMilkMan69_xX)\n\nThe kill counter is now represented simply by a unicode skull icon, rather than \"Monsters Killed: 69420\". (Xx_TheMilkMan69_xX)\n\nA tooltip will now display when you hover your mouse over the kill counter. There's even some easter eggs in there, if you know what to do... (Packard Bell 95)\n\nKill counts now persist across floors instead of resetting. The previous behavior was intended, but it was also stupid, dumb, and retarded. (Xx_TheMilkMan69_xX)\n\nEnemies killed by Boulding Balls no longer count towards your kill count. (Xx_TheMilkMan69_xX)\n\nBlowing up a Mimic or an NPC using C-4 will now count towards your kill count. (Packard Bell 95)\n\nUnder-the-hood online API interactions have seen updates and some unification. (VocaPepper)"
+        },
+        {
+          "version": "1.19.1",
+          "file_name": "TardQuest-1.19.1-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.19.1/TardQuest-1.19.1-x64.zip",
+          "sha256": "dbaf9e15e3d11c335273c1eed50eb1d46c5a5403f2019c8fa63fae7f4dd1734a",
+          "size": 94097408,
+          "release_notes": "Enemies are now able to face specific directions and you can only enter their line of sight if they are facing you, and are now represented by an arrow on the minimap like the player is. The viewport artwork does not reflect this yet, but I'll get to it eventually. (Xx_TheMilkMan69_xX)\n\nReduced enemy line of sight. (Xx_TheMilkMan69_xX)\n\nWielding a torch now increases enemies' line of sight. (Xx_TheMilkMan69_xX)\n\nEnemies will now respawn closer to the player. (Xx_TheMilkMan69_xX)\n\nA new portrait animation has been added, which will play under a specific circumstance where the player is bested by the infamous Fruit Bat. (Xx_TheMilkMan69_xX)\n\nIt will now take somewhat longer for the Fruit Bat to spawn on a floor. (Xx_TheMilkMan69_xX)\n\nThe Boulding Ball will now run over enemies that cross it's path. No EXP or BTC will be rewarded, but blood pools are left behind. (Xx_TheMilkMan69_xX)\n\nThere is now a kill counter below the minimap, just for fun. Enemies killed by the Boulding Ball will also count towards this counter, because I dictated so. (Xx_TheMilkMan69_xX)\n\nThe game will now only perform Carrier Pigeon delivery checks after the title screen has been advanced. (VocaPepper)"
+        },
+        {
+          "version": "1.19.0",
+          "file_name": "TardQuest-1.19.0-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.19.0/TardQuest-1.19.0-x64.zip",
+          "sha256": "e8a40612985546b3f2a22687930c53ed0bab028ab6beba01d67ea37d5c3e0c88",
+          "size": 93952409,
+          "release_notes": "New trap added; the Boulding Ball! It's like a boulder, but it's a bowling ball. Very fucking dangerous. May the Indiana Jones LARP sesh begin. (Xx_TheMilkMan69_xX)\n\nRandom encounters have been replaced with free-roaming enemies that physically run around the map. They will respawn in random spots after a few kills. If you get close enough, they will relentlessly pursue you. No, they cannot be blown up with C-4 for balancing reasons. (Xx_TheMilkMan69_xX)\n\nThe Ring of Stinky has been reworked entirely to work with the new free-roaming enemies system. Instead of simply lowering random encounter chances, it will provide you with a percent chance of making a nearby enemy run away from you per step taken. (Xx_TheMilkMan69_xX)\n\nAdded a wait button to the UI (also triggered by pressing SPACEBAR, B on Xbox, or Circle on Dualsense) that allows you to wait for a moment, allowing enemies to pass by if you so wish. This also counts towards the Fruit Bat's invisible step counter, so be wary. (Xx_TheMilkMan69_xX)\n\nFixed teasure chests not respecting the individual drop chances for loot. This has been broken for a very long time. You should no longer be able to pick up an invalid and unusable Carrier Pigeon from a chest, which would cause game-breaking bugs when used. (Xx_TheMilkMan69_xX)\n\nFixed coloring of the cracked floor on the minimap tooltip display. (Packard Bell 95)\n\nLogic added to help prevent enemy encounters from happening when the Fruit Bat interacts with the player. (Packard Bell 95)\n\nReworked standalone build to be a lone portable .exe, also resulting in the unzipped file size being significantly lower than before. This is specific to the Windows build. (VocaPepper)"
+        },
+        {
+          "version": "1.18.4",
+          "file_name": "TardQuest-1.18.4-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.18.4/TardQuest-1.18.4-x64.zip",
+          "sha256": "b36ecb097f6fd538d8141ccafacf3cf1ee5df9bedf2ceec4d45158f0ffddcdfb",
+          "size": 138412032,
+          "release_notes": "Unified the 3 title screen buttons into one multifunctional button. Clicking the button to begin the game should automatically skip the preloading process if desired. Credits were also updated. (Xx_TheMilkMan69_xX)\n\nRebalancing has been done to the following: Weapon+Armor prices, Weapon+Armor stats, Weapon+Armor stat requirements, item prices, and floor-based enemy stat scaling. (Xx_TheMilkMan69_xX)\n\nIncreased the starting amount of stat allocation points to 15. (Xx_TheMilkMan69_xX)\n\nPost-battle random encounter grace period; you are now able to take a few steps after a battle without running into another enemy, so you are no longer sometimes spammed by enemies every step you take. (Xx_TheMilkMan69_xX)\n\nAmbient SFX will no longer play on the title screen, nor during NPC/menu interactions. (Xx_TheMilkMan69_xX)\n\nAmbient SFX will now play more spread apart from each other. (Xx_TheMilkMan69_xX)\n\nInternal rework for how the ambient SFX playback intervals are handled. Basically, you will no longer consistently hear a sound play right after a fight ends. (Xx_TheMilkMan69_xX)\n\nProximity-based audio cues will now play when there is a Merchant or Erok (dog) NPC nearby. The volume of these sound effects will play repeatedly at different time intervals, and change in volume depending how close you are to the NPC. (Xx_TheMilkMan69_xX)\n\nFixed a softlock under the advent that a controller is connected, auto diceroll is enabled, level up animations are disabled, and a battle ends. AGAIN. (Xx_TheMilkMan69_xX)\n\nFixed ring2 alignment in the ring menu. It was shifted to the right somewhat. (Packard Bell 95)\n\nImproved the way in which the game detects input methods so that keyboard/pad icons change more accurately. (VocaPepper)"
+        },
+        {
+          "version": "1.18.3",
+          "file_name": "TardQuest-1.18.3-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.18.3/TardQuest-1.18.3-x64.zip",
+          "sha256": "c66fc6d471c5c66fc1d8f69ce8d2fa297486f5dc1f2807dd6cda8a1d079e2b65",
+          "size": 138412032,
+          "release_notes": "Whole new crazy batshit insane title screen! Very epic and cool. (Packard Bell 95)\n\nSkybox artwork added. Very epic and cool. (Xx_TheMilkMan69_xX)\n\nThe Cup of Lean now comes with unique VFX and SFX onec consumed. (Xx_TheMilkMan69_xX)\n\nNew torch animation - the old one was a placeholder my lazy never got around to replacing for the longest time. This one is much better. (Xx_TheMilkMan69_xX)\n\nReplaced gamepad emoji in the TardPad status modal with the actual TardPad icon. (Xx_TheMilkMan69_xX)\n\nNerfed chances for running away from battle. Cry about it, pussy (Xx_TheMilkMan69_xX)\n\nAmbient SFX will now play in the background. (Xx_TheMilkMan69_xX)\n\nInternally restructured audio folder for dev organization purposes. (Xx_TheMilkMan69_xX)\n\nA simple animation will now play when you descend a floor via the stairs. (Packard Bell 95)\n\nFixed the inability to advance the title screen using a gamepad. (Packard Bell 95)\n\nInternal rework of the menu system. (Packard Bell 95)\n\nColorized the close button in the inventory sidebar. (Packard Bell 95)\n\nFixed rendering issues imposed upon the inventory/nav sidebar when auto diceroll is enabled. (Packard Bell 95)\n\nGeneral polish in how the mouse cursor interacts with the menus; there shouldn't be onflicts with the controller/arrow keys/wasd when navigating menus while the mouse is hovering over an item anymore. (Packard Bell 95)"
+        },
+        {
+          "version": "1.18.2",
+          "file_name": "TardQuest-1.18.2-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.18.2/TardQuest-1.18.2-x64.zip",
+          "sha256": "12ae7f993794b1ee89deac16cf51a12f17872bbfe400a085267fc6aab72d73bc",
+          "size": 127926272,
+          "release_notes": "Fixed the standalone build's rather severe blurring issues. This shit was fucking annoying. The game should appear perfectly crisp on your 4K OLD HDR1000 TV again. (VocaPepper)\n\nAdded an additional retro filter setting to the standalone desktop app that allows you to enable a dithering filter on top of the scanlines filter (Xx_TheMilkman69_xX)\n\nMusic playback note icon is now animated (Packard Bell 95)\n\nInternal rework for how music is handled (Packard Bell 95)\n\nClickable button added to the UI that allows you to toggle the settings menu (Packard Bell 95)\n\nFixed the \"fruit bat\" theme not skipping the intro bit instead of strictly only looping the main battle loop under very specific circumstances (Packard Bell 95)\n\nMore colorization to messages in the battle log (Packard Bell 95)\n\nRedundant usage of consumable items has been addressed; you can no longer use up a dowsing rod if an exit has already been revealed, and you can't play another Trom-BONE while a trom-BONE is already being played (Packard Bell 95)\n\nSpeech synthesis pronunciaion fixes (Packard Bell 95)"
+        },
+        {
+          "version": "1.18.1",
+          "file_name": "TardQuest-1.18.1-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.18.1/TardQuest-1.18.1-x64.zip",
+          "sha256": "2572b0cd67b4a9afc0742517a93aa185bb3d169046f287271d3ddf4df4050c19",
+          "size": 137573171,
+          "release_notes": "Carrier Pigeon hotfix; the carrier pigeon was not consistently spawning specifically on floor 1 when a pending message was available. This is fixed here. (VocaPepper)\n\nThe TardBoard popup has been reworked so that you can enter a name using a controller. It also generally looks a lot nicer now. (VocaPepper)\n\nThe standalone build has seen a small makeover here. The dropdown menus are now in a toolbar right below the titlebar and the titlebar name has been moved to the left, with a logo next to it. The window control buttons also have a subtle color effect when clicked on. Generally, things are more functional and attractive to look at now. (Xx_TheMilkman69_xX)"
+        },
+        {
+          "version": "1.18.0",
+          "file_name": "TardQuest-1.18.0-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.18.0/TardQuest-1.18.0-x64.zip",
+          "sha256": "379580e0d0240a413f55bf7b2880324358a1cd3aeb2ffe12ac4964745d7cc1c4",
+          "size": 136314880,
+          "release_notes": "NEW MAJOR ONLINE FEATURE! You can now purchase a Carrier Pigeon from the Merchant. This will allow you to send out a message to the next player who picks it up from a pigeon. On the receiver's end, a pigeon NPC will spawn on the map and fly towards the player, and thus, the message will be played out. There are also measures in place generally preventing you from seeing your own messages come back your way unless you switch browsers/platforms. Art assets were done by Xx_TheMilkman69_xX, API hosted by VocaPepper, and some fixes done by Packard Bell 95.\n\nThe standalone Electron build now has full online compatibility, so you can now submit TardBoard scores via the standalone build. (VocaPepper)\n\nThe standalone Electron build now has an \"Online\" dropdown menu that allows you to toggle the TardBoard on and off, which will display as a draggable window. Currently, this is the only item under the \"Online\" dropdown. (Xx_TheMilkman69_xX)\n\nYou can spawn the vampire at will using a cheat now. I will not disclose what the cheat is, fuck you. (Xx_TheMilkman69_xX)\n\nThe visual presentation of the party member list has been updated and generally looks much nicer. (Packard Bell 95)\n\nImage assets now scale in a pixel perfect manner when blown up to a higher zoom level. Previously, they would appear blurry especially in the standalone build. (Xx_TheMilkman69_xX)\n\nTooltip persistence fix (Packard Bell 95)\n\nFix for the torch glowing animation overlapping the viewport header (packard Bell 95)\n\nGeneral TTS improvements (VocaPepper)"
+        },
+        {
+          "version": "1.17.0",
+          "file_name": "TardQuest-1.17.0-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.17.0/TardQuest-1.17.0-x64.zip",
+          "sha256": "543a6954fff2ba2aa5caf5f78b32a88339e6f0d7963197afb93b8a7d7e3d8556",
+          "size": 135266304,
+          "release_notes": "The big major feature included here is the new Fruit Bat entity. To keep things spoiler free, he will spawn after spending too much time on one floor. What does he do? Go and find out. (Packard Bell 95, bat theme + art by Xx_TheMilkman69_xX)\n\nThe game, by default, will now preload assets upon booting the game to help mitigate issues with rendering for users playing with slower internet connections. This can be skipped via the title screen, or disabled entirely via the settings menu. (VocaPepper)\n\nProper tooltips added to the inventory sidebar, as well as a general internal rework on how the tooltips are handled. (packard Bell 95)\n\nIt is now possible to use your mouse's scrollwheel to scroll through the inventory sidebar when applicable. (Packard Bell 95)\n\nNew music track (Stab Quest, or battle6 in the game files) added. Credit to \u25b6Kirbydogs for making and providing this track. (Xx_TheMilkman69_xX).\nBugfix for individual enemy attack stats not being respected. Some rebalancing has been done to reflect this fix as well. (Packard Bell 95)\n\nBugfix for breathing sounds not always playing when weight overencumberance has been achieved. (Packard Bell 95)\n\nKilling Erok gives you a -10 LUK debuff. (Packard Bell 95)\n\nThe Erok menu can now be backed out of using ESC when the petting animation is not in effect. (Packard Bell 95)"
+        },
+        {
+          "version": "1.16.4",
+          "file_name": "TardQuest-1.16.4-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.16.4/TardQuest-1.16.4-x64.zip",
+          "sha256": "150a86b6de66b2e98a9a75d8de0e91fd0869768f2322c8ce66908b1eeb441611",
+          "size": 136314880,
+          "release_notes": "The standalone Windows/Linux build has been massively overhauled and looks much more presentable, while also including some nice new additions, namely optional borders. I will probably add more features to this in the future, though it still will not work with any of the online APIs. You still need to play the web hosted version for that. (TheMilkMan)\n\nThis isn't really going to be visible on the web hosted version here, but the game will now attempt to center and zoom depending on the size of the window. This is applicable to the standalone build as well. (TheMilkMan)\n\nMinor fixes for the dog where if you quit the menu before the petting animation finished, his idle animation would persist over your minimap during exploration until a new portrait animation was called. You will suffer his absolute jackassery no longer. (TheMilkMan)\n\nIncreased the speed at which the enemy death animation plays out somewhat. (Packard Bell 95)\n\nAs a side note, I'm gonna start actually timestamping these updates. No clue why I haven't started doing this a long time ago."
+        },
+        {
+          "version": "1.16.3",
+          "file_name": "TardQuest-1.16.3-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.16.3/TardQuest-1.16.3-x64.zip",
+          "sha256": "e86f2f04a7974e8c67a7187a2314bea61ed942f03c0d08204a6ab0f403b32562",
+          "size": 134217728,
+          "release_notes": "Dog NPC added. His name is Erok. Go find him. I will elaborate no further. (TheMilkMan)\n\nEnemies now have a death animation upon defeat. You will now see your greatest enemies disintegrate into a pile of ash. (VocaPepper)\n\nSuicide cheat added; /k (VocaPepper)\n\nLevels will now roll properly, meaning you can have multiple level ups if you somehow obtain enough EXP from one fight. This will likely be useful for bosses whenever we get around to adding them. (VocaPepper)\n\nTitle screen music is functioning again. Somehow this broke within the past couple updates. (VocaPepper)\n\nThe standalone Windows build will now attempt to center the game on the window or in fullscreen. (TheMilkMan)"
+        },
+        {
+          "version": "1.16.0",
+          "file_name": "TardQuest-1.16.0-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.16.0/TardQuest-1.16.0-x64.zip",
+          "sha256": "97fa58771da14b9be75596ee2bdae3f8eccd6cc3f8a3e747914413d98c2f7253",
+          "size": 134217728,
+          "release_notes": "NPCs in the 3D viewport area are now colored, matching their portrait counterparts. They also have proper depth shading like the environment itself has. (TheMilkMan)\n\nPRS related fixes. (TheMilkMan)\n\nLUK now scales similarly to PRS where the stat number itself is your % chance at winning the diceroll minigame. Meaning, if your LUK stat is at 23, you have a 23% chance at success. (TheMilkMan)\n\nArrow keys will no longer scroll the page, regardless of whether the game is hosted within an iframe so long as it is focused. (TheMilkMan)\n\nEquipment menus are now inaccessible during battle. (TheMilkMan)\n\nThe Ring of Sightliness no longer allows you to reveal spaces that are behind walls. It instead simply just increases the range in which your invisible FOV cone reveals spaces, without revealing spaces that would be impossible to see within the 3D viewport. (TheMilkMan)\n\nHealing tiles now heal allies by 10%, mostly in preparation for a super duper secret overhaul we have planned for the future... (TheMilkMan)\n\nBrand new, significantly more detailed enemy artwork. The Badass Flaming Skeleton will now make your shit your pants! (TheMilkMan)\n\nFixed first person torch animation ceasing to animate after a while. (TheMilkman)\n\nThe Trom-BONE now has a unique first person animation. (TheMilkMan)\n\nNew exploration and battle music added. (TheMilkMan)\n\nMerchant music added. (TheMilkMan)\n\nGambler music added. (Packard Bell 95)\n\nAdded a new setting to the settings menu that allows you to pick and choose which specific exploration and music tracks that can be played in-game, including track and artist names.\n\nFixed HP buff rings keeping your HP above 0 when falling down a cracked floor, preventing you from actually getting a game over, therefore being softlocked. This also prevented the leaderboard entry popup from appearing. (TheMilkMan)\n\nBattle transition animations added. These can be toggled off in the settings menu. (TheMilkMan)\n\nFucking massive UI overhaul; you can now control the game in its entirety using just the mouse or a touchscreen, as there are now clickable icons that you can access menus with, as well as navigation and battle controls. It is also possible to select menu items using the mouse as well. (Packard Bell 95)\n\nNew art assets for said clickable UI buttons in the new UI overhaul introduced in this update. (TheMilkMan)\n\nIf desired, it is also possible to move around the world by clicking hotspots in the 3D viewport area. Your mouse cursor will change depending on where you're hovering the mouse, very much like Ultima Underworld. (Packard Bell 95)\n\nIt is now possible to actually get past the damn title screen using a mouse lol (Packard Bell 95)\n\nMinimap rendering optimizations (Packard Bell 95)\n\nCracked floors now have 3 different sprites instead of 2 to reflect a recent change made to them in a previous update. (Packard Bell 95)\n\nThere are now visual feedback effects during battle when you are hit by the enemy, or when you are hit. (VocaPepper)\n\nImproved speech synthesis (VocaPepper)\n\nGetting the new enemy artwork to actually display properly in-game (VocaPepper)\n\nXbox (Xinput) and Dualsense (Dinput) gamepad support added. Dualshock 4 has not been tested, I expect it wouldn't work as intended. Button icons will display in the bottom left control hints box when a gamepad is connected. (VocaPepper)\n\nGamepad button glyph assets included. (TheMilkMan)"
+        },
+        {
+          "version": "1.15.4",
+          "file_name": "TardQuest-1.15.4-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.15.4/TardQuest-1.15.4-x64.zip",
+          "sha256": "7b0fba1d595c330ed78d3f60bde6c0fa722fa5119c597bb26f897059737d9a82",
+          "size": 128974848,
+          "release_notes": "Minimap tooltips are no longer obscured by menus or other elements that may potentially block their visibility. (Packard Bell 95)\n\nThe title screen music now respects the music toggle setting. (TheMilkMan)\n\nTrom-BONE :) (TheMilkMan)"
+        },
+        {
+          "version": "1.15.0",
+          "file_name": "TardQuest-1.15.0-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.15.0/TardQuest-1.15.0-x64.zip",
+          "sha256": "3ca110327d195fb82bac8f8d37f6852a6aed5439f0c64fd9d8ba747e9698d697",
+          "size": 128974848,
+          "release_notes": "New title screen, artwork for said title screen, and a new logo. Nothing much else to say about that. (TheMilkMan)\n\nAdded a quickstart setting to the settings menu that allows you to automatically skip the title screen upon boot/reset. (TheMilkMan)\n\nUnique animated ASCII portraits now display in the minimap area when entering a menu or speaking with an NPC. This currently covers the inventory, settings, chest, merchant, and gambler menus. Cool shit. (TheMilkMan)\n\nVarious visual and sound enhancements; falling down a pit will turn the screen red when you go splat, stepping on a healing tile flashes the screen green and plays a sound effect, and selling things now play the kaching SFX. (Packard Bell 95)\n\nYour HP no longer goes to a negative value when dying. (Packard Bell 95)\n\nYou can no longer blow up an invisible Gambler. Don't even ask how this was possible, it just was. (Packard Bell 95)\n\nVarious persuasion updates; you can now cancel PRS/TALK by pressing ESC, and if you don't type anything into the textbox and hit enter anyway, a random bit of flavor text will be displayed. (Packard Bell 95)\n\nVarious under the hood code restuctures, etc (TheMilkMan + Packard Bell 95)"
+        },
+        {
+          "version": "1.14.0",
+          "file_name": "TardQuest-1.14.0-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.14.0/TardQuest-1.14.0-x64.zip",
+          "sha256": "77b05fa0ec92f75249ee05171ddf31241c7afa38b76f48a1c67e5283cadf3afa",
+          "size": 128974848,
+          "release_notes": "Party dialogue system has been completely revamped. After typing something into the battle log, instead of randomly picking a static preset message to respond with, the game will pull a random selection of words from word pools and insert them into word slots to create a totally sensical sentence. Some enemies even have their own unique sets of words to pull from. If that doesn't make any sense to you, that would be because the way this new system works is difficult for me to explain. All you need to know is it's fucking great now.(TheMilkMan)\n\nTALK/PRS textbox has once again been re-styled. (TheMilkMan)\n\nAdded toggles to the settings menu that allow you to disable level up animations and SFX. (TheMilkMan)\n\nSettings will now save to your browser's localstorage and persist whenever you load the game back up. (TheMilkMan)"
+        },
+        {
+          "version": "1.13.1",
+          "file_name": "TardQuest-1.13.1-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.13.1/TardQuest-1.13.1-x64.zip",
+          "sha256": "cf686d0a05d22fabffdebf66ceb0091085128c4f6db5cfca5ba2fc259e1899d5",
+          "size": 128974848,
+          "release_notes": "Weapons, armor, and rings now have weight. Now your END/LOAD stat actually matters! (TheMilkMan)\n\nAdded a \"Sell\" submenu to the Merchant. Needless to say, you can sell your inventory (including equipment), albeit with extremely poor resell value. (TheMilkMan)\n\nPectoral Piercing nerf. Get fucked. (TheMilkMan)\n\nEXP rollover FINALLY added. This has proven to be real annoying to implement. (Packard Bell 95)"
+        },
+        {
+          "version": "1.13.0",
+          "file_name": "TardQuest-1.13.0-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.13.0/TardQuest-1.13.0-x64.zip",
+          "sha256": "4d3e2eb4d67aa345843c8ceab58aad960787af3fe87fe5c08a9f8efe36d96ec5",
+          "size": 128974848,
+          "release_notes": "New weapon added - DANCE CLUB. (TheMilkMan)\n\nSTR, END, and LOAD stats added. (TheMilkMan)\n\nEvery point of STR increases your attack output by 1. END increases your LOAD stat, allowing you to carry more items. (TheMilkMan)\n\nLOAD determines how much weight you can carry before your SPD begins getting debuffed. Higher LOAD allows you to carry more items, in ooga booga terms. If you're at 50% of your max load, your SPD will begin getting debuffed and exertion breathing sounds will play. Reaching 80% will play even heavier breathing sounds. (TheMilkMan)\n\nCracked floors now, by default, take 3 steps instead of 2 before they give out and kill you. Hitting 50% of your LOAD will reduce that amount to 2, and 80+% will make you fall instantly. (TheMilkMan)\n\nWeapons and armor now require certain STR and END stats to be able to equip them. (TheMilkMan)\n\nIncreased amount of points that can be allocated during character creation, however, during a level up, you are now limited to putting two points into one stat at a time. This should prevent the player from dumping too many points into one stat, and stick with their initial build. (TheMilkMan)\n\nBuying rings now actually updates your current BTC amount like it should. (TheMilkMan)\n\nGeneral rebalancing of prices, enemy damage outputs, etc to reflect these updates. (TheMilkMan)"
+        },
+        {
+          "version": "1.12.0",
+          "file_name": "TardQuest-1.12.0-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.12.0/TardQuest-1.12.0-x64.zip",
+          "sha256": "7b9df322e6fa4055e3c4253a8c3cbdd16cc21be3396ebda2ea8f0d82e5ff0523",
+          "size": 128974848,
+          "release_notes": "The dungeon is now darker. By default, the 3D viewport has very limited visibility and you can't see too far ahead. Using a torch or equiping the Ring of Sightliness will extend the view distance somewhat. The general environment colors are also now darker. Torches will also emit a glowing screen effect when equipped. (Packard Bell 95)\n\nYou are now unable to use another torch if one is already being used, to prevent accidentally using up another torch, if you're that blind and retarded. (Packard Bell 95)"
+        },
+        {
+          "version": "1.11.4",
+          "file_name": "TardQuest-1.11.4-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.11.4/TardQuest-1.11.4-x64.zip",
+          "sha256": "2b6ebb18103713400c858a1239a316c4137ec66cd17e88b42aa0769c4f677b6e",
+          "size": 128974848,
+          "release_notes": "Added movement-based screen shake effects. (TheMilkMan)\n\nAdded a couple first person animations. After allocating your starting stats or leveling up, your character will pick up an innocent rat off the ground and eat it... live and raw. You will also visually carry a torch whenever you use a torch to reveal the whole floor. This will disappear once you reach the following floor. (TheMilkMan)\n\nAdded visual explosions effects when using C-4. It will also leave behind a pile of rubble. (Packard Bell 95)"
+        },
+        {
+          "version": "1.11.2",
+          "file_name": "TardQuest-1.11.2-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.11.2/TardQuest-1.11.2-x64.zip",
+          "sha256": "df1c3a0f15c1d876d4ea9814de05dc29f685412309ce7db6becef01c627330a1",
+          "size": 128974848,
+          "release_notes": "You are now limited to two persuasion attempts per battle, though legend has it there is an item you can acquire that can increase that limit... (TheMilkman)\n\nPRS stat reworked to cap the success chances to a stat of 100. For example, if your PRS stat is at 28, you will have a 28% chance at successfully persuading an enemy into your party. (TheMilkMan)\n\nThe Party list has been stylized a bit. (TheMilkMan)\n\nFixed minor issue with the rendering on the walls on the sides of the screen closest to the player. (Packard Bell 95)\n\nPlayer input is now fully blocked during the Gambler's diceroll animation. There was previously a bug where you could spam the ENTER key to keep rolling the dice, and it would result in you getting multiple diceroll outcomes. (TheMilkMan)\n\n'You died on floor X' text moved to the battle log. This was hiding behind the new raycast render previously. (TheMilkMan)"
+        },
+        {
+          "version": "1.11.1",
+          "file_name": "TardQuest-1.11.1-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.11.1/TardQuest-1.11.1-x64.zip",
+          "sha256": "cad83238ddcd0952ffb22377498abb4cde1c6640a371527946ed3b9d7ed549c5",
+          "size": 128974848,
+          "release_notes": "Ring menu fix. I will elaborate no further. (TheMilkman)"
+        },
+        {
+          "version": "1.11.0",
+          "file_name": "TardQuest-1.11.0-x64.zip",
+          "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.11.0/TardQuest-1.11.0-x64.zip",
+          "sha256": "81845f21cbd98a2affca4174b598a17147e3138f53c897823b280d320404e5cd",
+          "size": 128974848,
+          "release_notes": "Biggest update in a while! There is now a fake (totally real) 3D environment with unique NPC artwork, colors, and other neat environmental stuff that utilises raycasting tecniques. (Packard Bell 95)\n\nYou can now strafe using Q and E. (Packard Bell 95)"
+        }
+      ]
+    }
+  }
+}

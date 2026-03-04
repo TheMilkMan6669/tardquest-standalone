@@ -4,6 +4,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import threading
 import zipfile
@@ -18,12 +19,15 @@ from tkinter import filedialog, scrolledtext, ttk, messagebox
 
 # Constants
 MANIFEST_URL = "https://vocapepper.com:9601/api/launcher-win64"
+_BUNDLE_DIR = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parent))
+LOCAL_MANIFEST_PATH = _BUNDLE_DIR / "launcher-win64.json"
 EXE_PATTERN = re.compile(
     r"(?:Turd|Tard)Quest-(\d+\.\d+\.\d+(?:[-+][A-Za-z0-9_.-]+)?)-x64\.exe"
 )
 # Use APPDATA for user-specific installs; fallback to current directory if not set (e.g. on Linux)
 DEFAULT_INSTALL_DIR = Path(os.getenv("APPDATA", ".")) / "TQ Launcher" / "game"
 STATE_PATH = Path(os.getenv("APPDATA", ".")) / "TQ Launcher" / "launcher.config"
+CACHED_MANIFEST_PATH = Path(os.getenv("APPDATA", ".")) / "TQ Launcher" / "launcher-win64.json"
 DEFAULT_FONT_FAMILY = "DejaVu Sans Mono"
 FALLBACK_FONT_FAMILY = "Consolas"
 
@@ -109,10 +113,7 @@ def is_remote_newer(remote: str, local: Optional[str]) -> bool:
     return version_key(remote) > version_key(local)
 
 
-def fetch_manifest(url: str) -> ManifestIndex:
-    response = requests.get(url, timeout=15)
-    response.raise_for_status()
-    data = response.json()
+def _parse_manifest_data(data: dict) -> ManifestIndex:
     if "brands" in data:
         brands = {}
         for brand_name, brand_info in data.get("brands", {}).items():
@@ -120,6 +121,28 @@ def fetch_manifest(url: str) -> ManifestIndex:
             brands[brand_name] = [Manifest.from_dict(item) for item in versions]
         return ManifestIndex(brands=brands)
     raise ValueError("Manifest missing 'brands' section")
+
+
+def fetch_manifest(url: str) -> ManifestIndex:
+    response = requests.get(url, timeout=15)
+    response.raise_for_status()
+    data = response.json()
+    _cache_manifest_data(data)
+    return _parse_manifest_data(data)
+
+
+def _cache_manifest_data(data: dict) -> None:
+    """Persist the raw manifest JSON so it survives restarts."""
+    try:
+        CACHED_MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
+        CACHED_MANIFEST_PATH.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    except Exception:
+        pass  # Non-critical; worst case we fall back to the bundled copy
+
+
+def load_local_manifest(path: Path) -> ManifestIndex:
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return _parse_manifest_data(data)
 
 
 def find_existing_exe(install_dir: Path) -> Tuple[Optional[Path], Optional[str]]:
@@ -516,10 +539,45 @@ class LauncherApp:
             manifest_index = fetch_manifest(MANIFEST_URL)
         except Exception as exc:
             self._log(f"Failed to fetch manifest: {exc}")
-            self._set_update_available(False)
-            return
+            manifest_index = self._load_offline_manifest()
+            if manifest_index is None:
+                self._set_update_available(False)
+                return
 
         self._run_on_ui_thread(self._apply_manifest_index, manifest_index)
+
+    def _load_offline_manifest(self) -> Optional[ManifestIndex]:
+        """Try the cached manifest first, then the bundled copy."""
+        # Prefer the cached copy — it's the most recently fetched online data.
+        if CACHED_MANIFEST_PATH.exists():
+            self._log("Loading cached manifest...")
+            try:
+                index = load_local_manifest(CACHED_MANIFEST_PATH)
+                self._log(
+                    "WARNING: Using cached offline manifest. "
+                    "Version info may be outdated; connect to the "
+                    "internet and check for updates when possible."
+                )
+                return index
+            except Exception as exc:
+                self._log(f"Cached manifest unusable: {exc}")
+
+        # Fall back to the copy bundled at build time.
+        if LOCAL_MANIFEST_PATH.exists():
+            self._log("Loading bundled manifest...")
+            try:
+                index = load_local_manifest(LOCAL_MANIFEST_PATH)
+                self._log(
+                    "WARNING: Using bundled offline manifest. "
+                    "Version info may be outdated; connect to the "
+                    "internet and check for updates when possible."
+                )
+                return index
+            except Exception as exc:
+                self._log(f"Bundled manifest unusable: {exc}")
+
+        self._log("No offline manifest available.")
+        return None
 
     def _apply_manifest_index(self, manifest_index: ManifestIndex) -> None:
         self.manifest_index = manifest_index

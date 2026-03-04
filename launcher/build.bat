@@ -8,6 +8,7 @@ pyinstaller ^
   --name "TQ Launcher" ^
   --icon icon.ico ^
   --add-data "icon.ico;." ^
+  --add-data "launcher-win64.json;." ^
   launcher.py
 
 echo.
