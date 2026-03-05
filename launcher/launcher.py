@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import webbrowser
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -348,23 +349,16 @@ class LauncherApp:
         self.running_label = ttk.Label(title_frame, textvariable=self.game_running_var, style="Running.TLabel")
         self.running_label.pack(anchor="w", pady=(6, 0))
 
-        brand_frame = tk.Frame(header_inner, bg=bg_panel)
-        brand_frame.pack(side="right", padx=(8, 0))
-        ttk.Label(brand_frame, text="Edition:", style="Dim.TLabel").pack(side="left", padx=(0, 6))
-        combobox = ttk.Combobox(
-            brand_frame,
-            textvariable=self.brand_var,
-            values=list(self.branding_map.keys()),
-            state="readonly",
-            width=22,
-            font=font_small,
-            style="Brand.TCombobox",
+        right_header = tk.Frame(header_inner, bg=bg_panel)
+        right_header.pack(side="right", padx=(8, 0))
+
+        # Privacy Policy link
+        privacy_link = tk.Label(
+            right_header, text="Privacy Policy", font=font_small,
+            bg=bg_panel, fg=text_dim, cursor="hand2",
         )
-        combobox.pack(side="left")
-        combobox.bind("<<ComboboxSelected>>", lambda e: combobox.selection_clear())
-        combobox.bind("<FocusIn>", lambda e: combobox.selection_clear())
-        self.brand_var.trace_add("write", self._on_brand_change)
-        self.version_var.trace_add("write", self._on_version_change)
+        privacy_link.pack()
+        privacy_link.bind("<Button-1>", lambda e: webbrowser.open("https://tardquest.online/privacy"))
 
 
         content = tk.Frame(main, bg=bg_dark)
@@ -426,11 +420,23 @@ class LauncherApp:
         ver_grid = tk.Frame(version_section, bg=bg_panel)
         ver_grid.pack(fill="x")
 
-        ttk.Label(ver_grid, text="Latest:", style="Dim.TLabel").grid(row=1, column=0, sticky="w", pady=2)
-        self.remote_version_label = ttk.Label(ver_grid, textvariable=self.remote_version_var)
-        self.remote_version_label.grid(row=1, column=1, sticky="e", pady=2, padx=(8, 0))
+        ttk.Label(ver_grid, text="Edition:", style="Dim.TLabel").grid(row=0, column=0, sticky="w", pady=2)
+        brand_combobox = ttk.Combobox(
+            ver_grid,
+            textvariable=self.brand_var,
+            values=list(self.branding_map.keys()),
+            state="readonly",
+            width=16,
+            font=font_small,
+            style="Brand.TCombobox",
+        )
+        brand_combobox.grid(row=0, column=1, sticky="e", pady=2, padx=(8, 0))
+        brand_combobox.bind("<<ComboboxSelected>>", lambda e: brand_combobox.selection_clear())
+        brand_combobox.bind("<FocusIn>", lambda e: brand_combobox.selection_clear())
+        self.brand_var.trace_add("write", self._on_brand_change)
+        self.version_var.trace_add("write", self._on_version_change)
 
-        ttk.Label(ver_grid, text="Choose Build:", style="Dim.TLabel").grid(row=2, column=0, sticky="w", pady=2)
+        ttk.Label(ver_grid, text="Build:", style="Dim.TLabel").grid(row=1, column=0, sticky="w", pady=2)
         self.version_box = ttk.Combobox(
             ver_grid,
             textvariable=self.version_display_var,
@@ -440,7 +446,7 @@ class LauncherApp:
             font=font_small,
             style="Brand.TCombobox",
         )
-        self.version_box.grid(row=2, column=1, sticky="e", pady=2, padx=(8, 0))
+        self.version_box.grid(row=1, column=1, sticky="e", pady=2, padx=(8, 0))
         self.version_box.bind("<<ComboboxSelected>>", self._on_version_display_select)
         self.version_box.bind("<FocusIn>", lambda _: self.version_box.selection_clear() if self.version_box else None)
 
