@@ -1,8 +1,10 @@
 import hashlib
 import json
 import os
+import platform
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -18,19 +20,37 @@ import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import filedialog, scrolledtext, ttk, messagebox
 
+# Platform detection
+IS_LINUX = sys.platform.startswith("linux")
+IS_WINDOWS = sys.platform == "win32"
+
 # Constants
-MANIFEST_URL = "https://vocapepper.com:9601/api/launcher-win64"
 _BUNDLE_DIR = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parent))
-LOCAL_MANIFEST_PATH = _BUNDLE_DIR / "launcher-win64.json"
-EXE_PATTERN = re.compile(
-    r"(?:Turd|Tard)Quest-(\d+\.\d+\.\d+(?:[-+][A-Za-z0-9_.-]+)?)-x64\.exe"
-)
-# Use APPDATA for user-specific installs; fallback to current directory if not set (e.g. on Linux)
-DEFAULT_INSTALL_DIR = Path(os.getenv("APPDATA", ".")) / "TQ Launcher" / "game"
-STATE_PATH = Path(os.getenv("APPDATA", ".")) / "TQ Launcher" / "launcher.config"
-CACHED_MANIFEST_PATH = Path(os.getenv("APPDATA", ".")) / "TQ Launcher" / "launcher-win64.json"
-DEFAULT_FONT_FAMILY = "DejaVu Sans Mono"
-FALLBACK_FONT_FAMILY = "Consolas"
+
+if IS_LINUX:
+    MANIFEST_URL = "https://vocapepper.com:9601/api/launcher-linux"
+    LOCAL_MANIFEST_PATH = _BUNDLE_DIR / "launcher-linux.json"
+    _DATA_DIR = Path(os.getenv("XDG_DATA_HOME", Path.home() / ".local" / "share")) / "TQ Launcher"
+    _CONFIG_DIR = Path(os.getenv("XDG_CONFIG_HOME", Path.home() / ".config")) / "TQ Launcher"
+    DEFAULT_INSTALL_DIR = _DATA_DIR / "game"
+    STATE_PATH = _CONFIG_DIR / "launcher.config"
+    CACHED_MANIFEST_PATH = _DATA_DIR / "launcher-linux.json"
+    BINARY_PATTERN = re.compile(
+        r"(?:Turd|Tard)Quest-(\d+\.\d+\.\d+(?:[-+][A-Za-z0-9_.-]+)?)-x64\.AppImage"
+    )
+    DEFAULT_FONT_FAMILY = "DejaVu Sans Mono"
+    FALLBACK_FONT_FAMILY = "Monospace"
+else:
+    MANIFEST_URL = "https://vocapepper.com:9601/api/launcher-win64"
+    LOCAL_MANIFEST_PATH = _BUNDLE_DIR / "launcher-win64.json"
+    DEFAULT_INSTALL_DIR = Path(os.getenv("APPDATA", ".")) / "TQ Launcher" / "game"
+    STATE_PATH = Path(os.getenv("APPDATA", ".")) / "TQ Launcher" / "launcher.config"
+    CACHED_MANIFEST_PATH = Path(os.getenv("APPDATA", ".")) / "TQ Launcher" / "launcher-win64.json"
+    BINARY_PATTERN = re.compile(
+        r"(?:Turd|Tard)Quest-(\d+\.\d+\.\d+(?:[-+][A-Za-z0-9_.-]+)?)-x64\.exe"
+    )
+    DEFAULT_FONT_FAMILY = "DejaVu Sans Mono"
+    FALLBACK_FONT_FAMILY = "Consolas"
 
 
 @dataclass
@@ -146,6 +166,20 @@ def load_local_manifest(path: Path) -> ManifestIndex:
     return _parse_manifest_data(data)
 
 
+def _is_executable_file(path: Path) -> bool:
+    """Check if a file looks like a game binary for the current platform."""
+    if IS_WINDOWS:
+        return path.suffix.lower() == ".exe"
+    return path.suffix.lower() == ".appimage"
+
+
+def _binary_glob_patterns() -> list[str]:
+    """Return glob patterns for game binaries on the current platform."""
+    if IS_WINDOWS:
+        return ["*.exe"]
+    return ["*.AppImage"]
+
+
 def find_existing_exe(install_dir: Path) -> Tuple[Optional[Path], Optional[str]]:
     if not install_dir.exists():
         return None, None
@@ -154,16 +188,18 @@ def find_existing_exe(install_dir: Path) -> Tuple[Optional[Path], Optional[str]]
         if not child.is_dir():
             continue
         folder_version = child.name
-        for path in child.glob("*.exe"):
-            m = EXE_PATTERN.match(path.name)
-            if m:
-                version = folder_version if re.match(r"^\d+\.\d+\.\d+(?:[-+][A-Za-z0-9_.-]+)?$", folder_version) else m.group(1)
-                matches.append((version_key(version), path, version))
+        for pattern in _binary_glob_patterns():
+            for path in child.glob(pattern):
+                m = BINARY_PATTERN.match(path.name)
+                if m and _is_executable_file(path):
+                    version = folder_version if re.match(r"^\d+\.\d+\.\d+(?:[-+][A-Za-z0-9_.-]+)?$", folder_version) else m.group(1)
+                    matches.append((version_key(version), path, version))
     if not matches:
-        for path in install_dir.glob("*.exe"):
-            m = EXE_PATTERN.match(path.name)
-            if m:
-                matches.append((version_key(m.group(1)), path, m.group(1)))
+        for pattern in _binary_glob_patterns():
+            for path in install_dir.glob(pattern):
+                m = BINARY_PATTERN.match(path.name)
+                if m and _is_executable_file(path):
+                    matches.append((version_key(m.group(1)), path, m.group(1)))
     if not matches:
         return None, None
     matches.sort(key=lambda item: item[0], reverse=True)
@@ -180,16 +216,21 @@ def find_exe_for_version(install_dir: Path, version: str) -> Optional[Path]:
     if not version_dir.exists():
         return None
     matches = []
-    for path in version_dir.rglob("*.exe"):
-        m = EXE_PATTERN.match(path.name)
-        if m:
-            matches.append(path)
+    for pattern in _binary_glob_patterns():
+        for path in version_dir.rglob(pattern):
+            m = BINARY_PATTERN.match(path.name)
+            if m and _is_executable_file(path):
+                matches.append(path)
     if matches:
         return matches[0]
-    # Fallback: if exactly one exe exists, use it even if name has no version.
-    all_exes = list(version_dir.rglob("*.exe"))
-    if len(all_exes) == 1:
-        return all_exes[0]
+    # Fallback: if exactly one binary exists, use it even if name has no version.
+    all_bins = [
+        p for pattern in _binary_glob_patterns()
+        for p in version_dir.rglob(pattern)
+        if _is_executable_file(p)
+    ]
+    if len(all_bins) == 1:
+        return all_bins[0]
     return None
 
 
@@ -222,6 +263,13 @@ def extract_zip(archive: Path, dest_dir: Path) -> None:
         zf.extractall(dest_dir)
 
 
+def _ensure_executable(path: Path) -> None:
+    """Make a file executable on Linux."""
+    if IS_LINUX and path.is_file():
+        current = path.stat().st_mode
+        path.chmod(current | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+
+
 class LauncherApp:
     # ───────────────────────────────
     # Initialization & UI construction
@@ -230,12 +278,21 @@ class LauncherApp:
         self.root = tk.Tk()
         self.root.title("TQ Launcher")
         
-        icon_path = Path(__file__).resolve().parent / "icon.ico"
-        if icon_path.exists():
-            try:
-                self.root.iconbitmap(str(icon_path))
-            except Exception:
-                pass
+        if IS_LINUX:
+            icon_path = Path(__file__).resolve().parent / "icon.png"
+            if icon_path.exists():
+                try:
+                    icon_img = tk.PhotoImage(file=str(icon_path))
+                    self.root.iconphoto(True, icon_img)
+                except Exception:
+                    pass
+        else:
+            icon_path = Path(__file__).resolve().parent / "icon.ico"
+            if icon_path.exists():
+                try:
+                    self.root.iconbitmap(str(icon_path))
+                except Exception:
+                    pass
         
         self.state = LauncherState.load()
         self.latest_exe_path: Optional[Path] = None
@@ -290,7 +347,7 @@ class LauncherApp:
         progress_fill = accent
 
         self.root.configure(bg=bg_dark)
-        self.root.geometry("900x600")
+        self.root.geometry("990x660")
         self.root.resizable(False, False)
 
         available = set(tkfont.families())
@@ -880,17 +937,20 @@ class LauncherApp:
                 if actual.lower() != manifest.sha256.lower():
                     raise ValueError("Hash mismatch; download corrupted")
 
-            if temp_path.suffix.lower() == ".zip":
+            suffix = temp_path.suffix.lower()
+            if suffix == ".zip":
                 self._log("Extracting archive...")
                 extract_zip(temp_path, version_dir)
                 extracted_exe = find_exe_for_version(install_dir, manifest.version)
                 if not extracted_exe:
-                    raise FileNotFoundError("No matching EXE found after extraction")
+                    raise FileNotFoundError("No matching binary found after extraction")
+                _ensure_executable(extracted_exe)
                 new_exe_path = extracted_exe
             else:
                 final_path = version_dir / manifest.file_name
                 self._log("Placing new build...")
                 shutil.move(str(temp_path), final_path)
+                _ensure_executable(final_path)
                 new_exe_path = final_path
 
         self._set_progress(1.0)
@@ -910,6 +970,7 @@ class LauncherApp:
             self._log("Missing binary")
             return
         try:
+            _ensure_executable(exe_path)
             self.game_process = subprocess.Popen([str(exe_path)], cwd=str(install_dir))
             self._log("Game started")
             self._start_game_monitor()
