@@ -1,10 +1,39 @@
 import 'update-electron-app';
-import { BrowserWindow, app, ipcMain, protocol, net } from 'electron';
+import { BrowserWindow, app, ipcMain, protocol } from 'electron';
 import path from 'path';
-import { fileURLToPath, pathToFileURL } from 'url';
+import { fileURLToPath } from 'url';
+import { readFile } from 'fs/promises';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(__dirname, 'HttpData');
+
+const MIME_TYPES = {
+    '.html': 'text/html',
+    '.css':  'text/css',
+    '.js':   'application/javascript',
+    '.json': 'application/json',
+    '.png':  'image/png',
+    '.jpg':  'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.gif':  'image/gif',
+    '.svg':  'image/svg+xml',
+    '.ico':  'image/x-icon',
+    '.cur':  'image/x-icon',
+    '.webp': 'image/webp',
+    '.woff': 'font/woff',
+    '.woff2':'font/woff2',
+    '.ttf':  'font/ttf',
+    '.otf':  'font/otf',
+    '.mp3':  'audio/mpeg',
+    '.ogg':  'audio/ogg',
+    '.wav':  'audio/wav',
+    '.mp4':  'video/mp4',
+    '.webm': 'video/webm',
+};
+
+function getMimeType(filePath) {
+    return MIME_TYPES[path.extname(filePath).toLowerCase()] || 'application/octet-stream';
+}
 
 // Register custom scheme before app is ready
 protocol.registerSchemesAsPrivileged([
@@ -74,7 +103,7 @@ const createWindow = () => {
 
 app.whenReady().then(() => {
     // Handle app:// protocol by serving files from HttpData/
-    protocol.handle('app', (request) => {
+    protocol.handle('app', async (request) => {
         const url = new URL(request.url);
         const decodedPath = decodeURIComponent(url.pathname);
         const filePath = path.normalize(path.join(publicDir, decodedPath));
@@ -84,7 +113,14 @@ app.whenReady().then(() => {
             return new Response('Forbidden', { status: 403 });
         }
 
-        return net.fetch(pathToFileURL(filePath).toString());
+        try {
+            const data = await readFile(filePath);
+            return new Response(data, {
+                headers: { 'Content-Type': getMimeType(filePath) }
+            });
+        } catch {
+            return new Response('Not Found', { status: 404 });
+        }
     });
 
     createWindow();
