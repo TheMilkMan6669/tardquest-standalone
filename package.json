@@ -23,7 +23,8 @@
     "appId": "com.themilkman.tardquest",
     "asar": true,
     "files": [
-      "**/*"
+      "**/*",
+      "!launcher/**/*"
     ],
     "directories": {
       "output": "dist"

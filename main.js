@@ -1,33 +1,26 @@
 import 'update-electron-app';
-import { BrowserWindow, app, ipcMain } from 'electron';
+import { BrowserWindow, app, ipcMain, protocol, net } from 'electron';
 import path from 'path';
-import { fileURLToPath } from 'url';
-import express from 'express';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-// --- Start Express HTTP server ---
-const serverPort = 9599;
 const publicDir = path.join(__dirname, 'HttpData');
 
-const webApp = express();
-
-// Serve static assets from GameData (serves index.html for / by default)
-webApp.use(express.static(publicDir));
-
-// 404 handler to mirror previous behavior
-webApp.use((req, res) => {
-    res.status(404).send('Not found');
-});
-
-const server = webApp.listen(serverPort, () => {
-    console.log(`Local server running at http://localhost:${serverPort}`);
-});
-
-server.on('error', (err) => {
-    console.error('Local server error:', err);
-});
-// --- End Express HTTP server ---
+// Register custom scheme before app is ready
+protocol.registerSchemesAsPrivileged([
+    {
+        scheme: 'app',
+        privileges: {
+            standard: true,
+            secure: true,
+            supportFetchAPI: true,
+            corsEnabled: true,
+            stream: true,
+            allowServiceWorkers: true,
+            codeCache: true
+        }
+    }
+]);
 
 app.commandLine.appendSwitch('no-sandbox');
 
@@ -76,22 +69,27 @@ const createWindow = () => {
         win.webContents.send('fullscreen-changed', false);
     });
 
-    win.loadURL(`http://localhost:${serverPort}/AppData/index.html`);
+    win.loadURL('app://tard.quest/AppData/index.html');
 };
 
 app.whenReady().then(() => {
+    // Handle app:// protocol by serving files from HttpData/
+    protocol.handle('app', (request) => {
+        const url = new URL(request.url);
+        const decodedPath = decodeURIComponent(url.pathname);
+        const filePath = path.normalize(path.join(publicDir, decodedPath));
+
+        // Prevent directory traversal
+        if (!filePath.startsWith(publicDir)) {
+            return new Response('Forbidden', { status: 403 });
+        }
+
+        return net.fetch(pathToFileURL(filePath).toString());
+    });
+
     createWindow();
 });
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit();
-});
-
-// Ensure the local server is closed on app quit
-app.on('before-quit', () => {
-    try {
-        server.close();
-    } catch (e) {
-        // ignore
-    }
 });
