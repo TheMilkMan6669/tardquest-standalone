@@ -10,7 +10,7 @@
       "versions": [
         {
           "version": "1.20.0",
-          "file_name": "TardQuest-1.20.0-Linux.zip",
+          "file_name": "TardQuest-1.20.0-AppImage.zip",
           "download_url": "https://github.com/packardbell95/tardquest/releases/download/1.20.0/TardQuest-1.20.0-AppImage.zip",
           "sha256": "cc96bc790c5f4845f12b5717469ff83f7d3ed2a091fb3ed97829973b6ce30994",
           "size": 94097408,
