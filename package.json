@@ -1,6 +1,6 @@
 {
   "name": "tardquest",
-  "version": "1.20.0",
+  "version": "1.20.1",
   "description": "Electron port of TardQuest",
   "main": "main.js",
   "scripts": {
