@@ -11,7 +11,7 @@ import tempfile
 import threading
 import webbrowser
 import zipfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -61,6 +61,7 @@ class Manifest:
     sha256: Optional[str] = None
     size: Optional[int] = None
     release_notes: Optional[str] = None
+    patch: Optional[str] = None
 
     @classmethod
     def from_dict(cls, data: dict) -> "Manifest":
@@ -75,6 +76,7 @@ class Manifest:
             sha256=str(data["sha256"]) if data.get("sha256") else None,
             size=int(data["size"]) if data.get("size") is not None else None,
             release_notes=str(data["release_notes"]) if data.get("release_notes") else None,
+            patch=str(data["patch"]) if data.get("patch") else None,
         )
 
 
@@ -83,12 +85,14 @@ class LauncherState:
     install_dir: Path
     local_version: Optional[str]
     brand: str = "TardQuest"
+    local_patches: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         return {
             "install_dir": str(self.install_dir),
             "local_version": self.local_version,
             "brand": self.brand,
+            "local_patches": self.local_patches,
         }
 
     @classmethod
@@ -99,7 +103,8 @@ class LauncherState:
                 install_dir = Path(data.get("install_dir", DEFAULT_INSTALL_DIR))
                 local_version = data.get("local_version")
                 brand = data.get("brand", "TardQuest")
-                return cls(install_dir=install_dir, local_version=local_version, brand=brand)
+                local_patches = data.get("local_patches", {})
+                return cls(install_dir=install_dir, local_version=local_version, brand=brand, local_patches=local_patches)
             except Exception:
                 pass
         return cls(install_dir=DEFAULT_INSTALL_DIR, local_version=None, brand="TardQuest")
@@ -660,9 +665,7 @@ class LauncherApp:
         self.manifest = selected_manifest or latest_manifest
 
         self._refresh_ui(update_status=True)
-        if self._is_selected_version_installed():
-            self._log("Up to date")
-        elif self.update_available:
+        if self.update_available:
             self._log("Update available")
         else:
             self._log("Up to date")
@@ -765,16 +768,37 @@ class LauncherApp:
         else:
             self._on_version_change()
 
+    def _is_tqo2(self) -> bool:
+        """Return True when the selected brand is TardQuest Online II."""
+        return self.brand_var.get() == "TardQuest Online II"
+
+    def _get_local_patch(self, channel: Optional[str] = None) -> Optional[str]:
+        ch = channel or self.version_var.get()
+        return self.state.local_patches.get(f"TardQuest Online II/{ch}")
+
+    def _set_local_patch(self, channel: str, patch: str) -> None:
+        self.state.local_patches[f"TardQuest Online II/{channel}"] = patch
+        self._save_state()
+
     def _evaluate_update_status(self) -> None:
+        if not self.manifest:
+            self._set_update_available(False)
+            return
+        if self._is_tqo2():
+            installed = self._is_selected_version_installed()
+            if not installed:
+                self._set_update_available(True)
+                return
+            local_patch = self._get_local_patch()
+            remote_patch = self.manifest.patch
+            self._set_update_available(bool(remote_patch and remote_patch != local_patch))
+            return
         install_dir = self._get_brand_install_dir()
         selected_version = self.version_var.get()
         if selected_version:
             local_version = selected_version if find_exe_for_version(install_dir, selected_version) else None
         else:
             _, local_version = find_existing_exe(install_dir)
-        if not self.manifest:
-            self._set_update_available(False)
-            return
         if self._has_installed_version(self.manifest.version):
             self._set_update_available(False)
             return
@@ -800,10 +824,23 @@ class LauncherApp:
         else:
             has_exe = self.latest_exe_path is not None and self.latest_exe_path.exists()
         running = self._is_game_running()
+        show_update = self._is_tqo2() and self.update_available
 
         def apply_state() -> None:
-            if self.play_btn:
-                self.play_btn.configure(state=tk.NORMAL if has_exe and not running else tk.DISABLED)
+            if not self.play_btn:
+                return
+            if show_update:
+                self.play_btn.configure(
+                    text="\u25b6 UPDATE",
+                    command=self._start_download,
+                    state=tk.NORMAL if not running else tk.DISABLED,
+                )
+            else:
+                self.play_btn.configure(
+                    text="\u25b6 PLAY",
+                    command=self._start_game,
+                    state=tk.NORMAL if has_exe and not running else tk.DISABLED,
+                )
 
         self.root.after(0, apply_state)
 
@@ -914,12 +951,17 @@ class LauncherApp:
             self._log(f"Download failed: {exc}")
             return
         self._log("Update applied")
+        if self._is_tqo2() and manifest.patch:
+            self._set_local_patch(manifest.version, manifest.patch)
         self._set_update_available(False)
         self._run_on_ui_thread(self._post_download_refresh)
 
     def _download_and_apply(self, manifest: Manifest, install_dir: Path) -> None:
         install_dir.mkdir(parents=True, exist_ok=True)
         version_dir = get_version_dir(install_dir, manifest.version)
+        if self._is_tqo2() and version_dir.exists():
+            self._log("Removing old build...")
+            shutil.rmtree(version_dir)
         version_dir.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory() as tmpdir:
             temp_path = Path(tmpdir) / manifest.file_name
