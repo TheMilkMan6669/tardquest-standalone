@@ -3,9 +3,13 @@ import { BrowserWindow, app, ipcMain, protocol } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { readFile } from 'fs/promises';
+import { readFileSync, writeFileSync } from 'fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(__dirname, 'HttpData');
+const windowStatePath = path.join(app.getPath('userData'), 'window-state.json');
+const defaultWindowState = { width: 1280, height: 720, fullscreen: true };
+const minimumWindowState = { width: 604, height: 600 };
 
 const MIME_TYPES = {
     '.html': 'text/html',
@@ -35,6 +39,36 @@ function getMimeType(filePath) {
     return MIME_TYPES[path.extname(filePath).toLowerCase()] || 'application/octet-stream';
 }
 
+function loadWindowState() {
+    try {
+        const savedState = JSON.parse(readFileSync(windowStatePath, 'utf8'));
+        return {
+            width: Math.max(minimumWindowState.width, Number(savedState.width) || defaultWindowState.width),
+            height: Math.max(minimumWindowState.height, Number(savedState.height) || defaultWindowState.height),
+            fullscreen: savedState.fullscreen !== false
+        };
+    } catch {
+        return defaultWindowState;
+    }
+}
+
+function saveWindowState(win) {
+    const isFullscreen = win.isFullScreen();
+    const bounds = win.isMaximized() || isFullscreen
+        ? win.getNormalBounds()
+        : win.getBounds();
+
+    try {
+        writeFileSync(windowStatePath, JSON.stringify({
+            width: bounds.width,
+            height: bounds.height,
+            fullscreen: isFullscreen
+        }));
+    } catch (error) {
+        console.error('Unable to save window state:', error);
+    }
+}
+
 // Register custom scheme before app is ready
 protocol.registerSchemesAsPrivileged([
     {
@@ -54,15 +88,16 @@ protocol.registerSchemesAsPrivileged([
 app.commandLine.appendSwitch('no-sandbox');
 
 const createWindow = () => {
+    const windowState = loadWindowState();
     const win = new BrowserWindow({
-        width: 1280,
-        height: 720,
-        minWidth: 604,
-        minHeight: 600,
+        width: windowState.width,
+        height: windowState.height,
+        minWidth: minimumWindowState.width,
+        minHeight: minimumWindowState.height,
         autoHideMenuBar: true,
         frame: false,
         roundedCorners: false,
-        fullscreen: true,
+        show: false,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
@@ -71,6 +106,15 @@ const createWindow = () => {
             sandbox: false
         }
     });
+
+    let windowStateSaveTimeout;
+    const scheduleWindowStateSave = () => {
+        clearTimeout(windowStateSaveTimeout);
+        windowStateSaveTimeout = setTimeout(() => {
+            windowStateSaveTimeout = null;
+            saveWindowState(win);
+        }, 250);
+    };
 
     // Handle window controls from renderer
     ipcMain.handle('window-minimize', () => win.minimize());
@@ -82,6 +126,7 @@ const createWindow = () => {
         }
     });
     ipcMain.handle('window-close', () => win.close());
+    ipcMain.handle('window-is-fullscreen', () => win.isFullScreen());
     ipcMain.handle('window-fullscreen', () => {
         if (win.isFullScreen()) {
             win.setFullScreen(false);
@@ -97,8 +142,19 @@ const createWindow = () => {
     win.on('leave-full-screen', () => {
         win.webContents.send('fullscreen-changed', false);
     });
+    win.on('resize', scheduleWindowStateSave);
+    win.on('close', () => {
+        clearTimeout(windowStateSaveTimeout);
+        saveWindowState(win);
+    });
 
     win.loadURL('app://tard.quest/AppData/index.html');
+    win.once('ready-to-show', () => {
+        if (windowState.fullscreen) {
+            win.setFullScreen(true);
+        }
+        win.show();
+    });
 };
 
 app.whenReady().then(() => {

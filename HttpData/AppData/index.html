@@ -54,6 +54,21 @@
                 <option value="apitest">APITest</option>
             </select>
         </div>
+        <div class="audio-volume-selector">
+            <label class="audio-volume-label" for="audioVolume"><b>VOLUME</b> </label>
+            <input
+                class="audio-volume"
+                id="audioVolume"
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value="100"
+                aria-label="Game audio volume"
+                title="Game audio volume"
+            >
+            <span hidden id="audioVolumeValue" class="audio-volume-value"></span>
+        </div>
     </div>
 
 <!----------------------------------------- Body --------------------------------------->
@@ -109,6 +124,7 @@
     <script src="../AppData/scripts/tardboard.js"></script>
     <script src="../AppData/scripts/tardtest.js"></script>
     <script src="../AppData/scripts/apitest.js"></script>
+    <script src="../AppData/scripts/audio.js"></script>
     <script src="https://milklounge.wang/tardquest/devtools.js"></script>
     <script src="../AppData/scripts/windowfocus.js"></script>
 </body>
