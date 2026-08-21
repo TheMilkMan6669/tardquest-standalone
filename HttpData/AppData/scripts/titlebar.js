@@ -70,8 +70,9 @@ function resizeFrame() {
     const aspectRatio = originalWidth / originalHeight;
     
     // Calculate available space
-    const titlebarHeight = 20;
-    const toolbarHeight = 23;
+    const controlsHidden = document.body.classList.contains('fullscreen-controls-hidden');
+    const titlebarHeight = controlsHidden ? 0 : 20;
+    const toolbarHeight = controlsHidden ? 0 : 23;
     const borderWidth = 4; // Your body border
     
     const availableWidth = window.innerWidth - (borderWidth * 2);
@@ -92,9 +93,52 @@ function resizeFrame() {
     iframe.style.transformOrigin = 'top center';
 }
 
+let controlsHideTimeout;
+
+function setFullscreenMode(isFullscreen) {
+    document.body.classList.toggle('fullscreen-mode', isFullscreen);
+    document.body.classList.toggle('fullscreen-controls-hidden', isFullscreen);
+    resizeFrame();
+}
+
+function showFullscreenControls() {
+    clearTimeout(controlsHideTimeout);
+    document.body.classList.remove('fullscreen-controls-hidden');
+    resizeFrame();
+}
+
+function hideFullscreenControls() {
+    if (document.body.classList.contains('fullscreen-mode')) {
+        document.body.classList.add('fullscreen-controls-hidden');
+        resizeFrame();
+    }
+}
+
+function setupFullscreenControls() {
+    window.electronAPI.onFullscreenChange((_event, isFullscreen) => {
+        setFullscreenMode(isFullscreen);
+    });
+
+    window.electronAPI.isFullscreen().then(setFullscreenMode);
+
+    document.addEventListener('mousemove', (event) => {
+        if (!document.body.classList.contains('fullscreen-mode')) {
+            return;
+        }
+
+        if (event.clientY <= 12) {
+            showFullscreenControls();
+        } else if (!document.body.classList.contains('fullscreen-controls-hidden')) {
+            clearTimeout(controlsHideTimeout);
+            controlsHideTimeout = setTimeout(hideFullscreenControls, 630);
+        }
+    });
+}
+
 // Load saved border on page load
 window.addEventListener('load', function() {
     loadSavedBorder();
+    setupFullscreenControls();
     resizeFrame();
 });
 

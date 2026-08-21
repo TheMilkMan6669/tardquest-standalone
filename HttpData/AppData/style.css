@@ -48,6 +48,11 @@ iframe#gameFrame {
     overflow: hidden;
 }
 
+.fullscreen-mode.fullscreen-controls-hidden .main-content {
+    height: 100%;
+    margin-top: 0;
+}
+
 /* ============================== Titlebar =============================== */
 
 .toolbar-strip {
@@ -64,6 +69,7 @@ iframe#gameFrame {
     border: inset 2px;
     margin-left: 4px;
     margin-right: 4px;
+    transition: transform 0.275s ease, opacity 0.275s ease;
 }
 
 .custom-titlebar {
@@ -80,6 +86,19 @@ iframe#gameFrame {
     padding: 0px;
     user-select: none;
     box-shadow: #0000006b 0px 0px 0px 5px;
+    transition: transform 0.275s ease, opacity 0.275s ease;
+}
+
+.fullscreen-controls-hidden .custom-titlebar {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-100%);
+}
+
+.fullscreen-controls-hidden .toolbar-strip {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-45px);
 }
 
 .custom-titlebar-logo {

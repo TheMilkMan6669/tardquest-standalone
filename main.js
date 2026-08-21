@@ -3,9 +3,13 @@ import { BrowserWindow, app, ipcMain, protocol } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { readFile } from 'fs/promises';
+import { readFileSync, writeFileSync } from 'fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(__dirname, 'HttpData');
+const windowStatePath = path.join(app.getPath('userData'), 'window-state.json');
+const defaultWindowState = { width: 1280, height: 720 };
+const minimumWindowState = { width: 604, height: 600 };
 
 const MIME_TYPES = {
     '.html': 'text/html',
@@ -35,6 +39,35 @@ function getMimeType(filePath) {
     return MIME_TYPES[path.extname(filePath).toLowerCase()] || 'application/octet-stream';
 }
 
+function loadWindowState() {
+    try {
+        const savedState = JSON.parse(readFileSync(windowStatePath, 'utf8'));
+        return {
+            width: Math.max(minimumWindowState.width, Number(savedState.width) || defaultWindowState.width),
+            height: Math.max(minimumWindowState.height, Number(savedState.height) || defaultWindowState.height)
+        };
+    } catch {
+        return defaultWindowState;
+    }
+}
+
+function saveWindowState(win) {
+    if (win.isFullScreen()) {
+        return;
+    }
+
+    const bounds = win.isMaximized() ? win.getNormalBounds() : win.getBounds();
+
+    try {
+        writeFileSync(windowStatePath, JSON.stringify({
+            width: bounds.width,
+            height: bounds.height
+        }));
+    } catch (error) {
+        console.error('Unable to save window state:', error);
+    }
+}
+
 // Register custom scheme before app is ready
 protocol.registerSchemesAsPrivileged([
     {
@@ -54,11 +87,12 @@ protocol.registerSchemesAsPrivileged([
 app.commandLine.appendSwitch('no-sandbox');
 
 const createWindow = () => {
+    const windowState = loadWindowState();
     const win = new BrowserWindow({
-        width: 1280,
-        height: 720,
-        minWidth: 604,
-        minHeight: 600,
+        width: windowState.width,
+        height: windowState.height,
+        minWidth: minimumWindowState.width,
+        minHeight: minimumWindowState.height,
         autoHideMenuBar: true,
         frame: false,
         roundedCorners: false,
@@ -82,6 +116,7 @@ const createWindow = () => {
         }
     });
     ipcMain.handle('window-close', () => win.close());
+    ipcMain.handle('window-is-fullscreen', () => win.isFullScreen());
     ipcMain.handle('window-fullscreen', () => {
         if (win.isFullScreen()) {
             win.setFullScreen(false);
@@ -97,6 +132,8 @@ const createWindow = () => {
     win.on('leave-full-screen', () => {
         win.webContents.send('fullscreen-changed', false);
     });
+    win.on('resize', () => saveWindowState(win));
+    win.on('close', () => saveWindowState(win));
 
     win.loadURL('app://tard.quest/AppData/index.html');
 };
