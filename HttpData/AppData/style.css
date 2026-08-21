@@ -228,10 +228,71 @@ iframe#gameFrame {
 .border-selector,
 .filter-selector,
 .online-selector,
-.dev-selector {
+.dev-selector,
+.audio-volume-selector {
     -webkit-app-region: no-drag;
     margin-left: 0;
     padding-left: 0;
+}
+
+.audio-volume-selector {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    margin-right: 4px;
+    height: 21px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.audio-volume-label {
+    font-size: 12px;
+    color: #000000;
+    text-shadow: none;
+}
+
+.audio-volume {
+    appearance: none;
+    width: 94px;
+    height: 16px;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.audio-volume::-webkit-slider-runnable-track {
+    height: 6px;
+    background: #808080;
+    border-top: solid 1px #404040;
+    border-bottom: solid 1px #eeeeee;
+}
+
+.audio-volume::-webkit-slider-thumb {
+    appearance: none;
+    width: 30px;
+    height: 14px;
+    margin-top: -5px;
+    background: linear-gradient(to right, #eeeeee 0%, #b1b1b1 100%);
+    border: outset 2px #b1b1b1;
+    box-sizing: border-box;
+}
+
+.audio-volume:active::-webkit-slider-thumb {
+    border-style: inset;
+    background: #d6d6d6;
+}
+
+.audio-volume:focus {
+    outline: 1px dotted #000000;
+    outline-offset: 1px;
+}
+
+.audio-volume-value {
+    min-width: 30px;
+    text-align: right;
 }
 
 /* ============================Retro Filter================================= */
